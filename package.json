@@ -1,0 +1,14 @@
+{
+    "name": "cyber-server",
+    "dependencies": {
+        "electron": "^1.7.9"
+    },
+    "scripts": {
+        "start": "electron ."
+    },
+    "main": "main.js",
+    "version": "1.1.1",
+    "license": "MIT",
+    "description": "",
+    "author": "Edel Custodio Frias"
+}
