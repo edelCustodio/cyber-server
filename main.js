@@ -17,6 +17,7 @@ const url = require('url')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let mainSession
 
 function createWindow () {
   
@@ -28,6 +29,8 @@ function createWindow () {
         partition: 'persist:name'
       }
   });
+
+  mainSession = mainWindow.webContents.session
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -47,8 +50,6 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   });
-
-
 
   //Create cyber cafe server
   createCyberServer();
@@ -84,8 +85,6 @@ function createCyberServer() {
   var host = '127.0.0.1';
   var port = 6969;
   
-  
-
   // Create a server instance, and chain the listen function to it
   // The function passed to net.createServer() becomes the event handler for the 'connection' event
   // The sock object the callback function receives UNIQUE for each connection
@@ -94,7 +93,7 @@ function createCyberServer() {
       client: sock,
       isOnline: true
     };
-
+    
     if(clients.length > 0){
       for(var i = 0; i < clients.length; i++){
         if(clients[i].client = client.client){
@@ -102,42 +101,55 @@ function createCyberServer() {
         }
       }
     }
-      
 
-      clients.push(client);
-      // We have a connection - a socket object is assigned to the connection automatically
-      console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
-      
-      // Add a 'data' event handler to this instance of socket
-      sock.on('data', function(data) {
-          
-        var textData = data.toString('utf8');
-        console.log('DATA ' + sock.remoteAddress + ': ' + data);
-        // Write the data back to the socket, the client will receive it as data from the server
-        sock.write('You said "' + textData + '"');
-          
-      });
-      
-      // Add a 'close' event handler to this instance of socket
-      
-      sock.on('close', function(data) {
-          console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
-      });
-
-      sock.on('error', function(data){
-        console.error('Error message: ' + data.message + '\n\nStack' + data.stack);
+    clients.push(client);
+    // We have a connection - a socket object is assigned to the connection automatically
+    console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
+    
+    // Add a 'data' event handler to this instance of socket
+    sock.on('data', function(data) {
         
-      });
-
-      sock.on('clientError', function(data){
-        console.error('Client Error message: ' + data.message + '\n\nStack' + data.stack);
+      var textData = data.toString('utf8');
+      console.log('DATA ' + sock.remoteAddress + ': ' + data);
+      // Write the data back to the socket, the client will receive it as data from the server
+      sock.write('You said "' + textData + '"');
         
-      });
+    });
+    
+    // Add a 'close' event handler to this instance of socket
+    sock.on('close', function(data) {
+        console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
+    });
+
+    sock.on('error', function(data){
+      console.error('Error message: ' + data.message + '\n\nStack' + data.stack);
+    });
+
+    sock.on('clientError', function(data){
+      console.error('Client Error message: ' + data.message + '\n\nStack' + data.stack);
       
-      sock.write('hello world\r\n');
+    });
+    
+    sock.write('hello world\r\n');
   });
 
   server.listen(port, host);
   
   console.log('Server listening on ' + host +':'+ port);
 }
+
+var serverCookiesHandler = {
+  setCookie: function(username) {
+    
+    mainSession.cookies.set({
+      url: 'http://localhost:6969',
+      name: username,
+      value: username,
+      domain: 'cyber.skynet.com'
+    }, (error) => {
+      console.log(error);
+    })
+  }
+}
+
+module.exports = serverCookiesHandler

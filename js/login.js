@@ -1,94 +1,109 @@
+let apiURL = "http://localhost:6868";
 
 $(document).ready(function () {
 
 })
 
-$("#btnLogin").click(function(){
-    /*
-    var user = $("#user").val();
+$("#btnLogin").click(function(e){
+    
+    var user = $("#username").val();
     var pass = $("#password").val();
-
-    $.post('http://localhost:6868/login', {user: user, pass: pass }, function(data) {
-        console.log(data);
-    })
-*/
-    var nFrom, nAlign, nIcons, nAnimIn, nAnimOut;
-    var nType = 'success';
-    notify(nFrom, nAlign, nIcons, nType, nAnimIn, nAnimOut);
-
-    /*
-    $.ajax({
-        method: 'POST',
-        url: 'http://localhost:6969/login',
-        data: JSON.stringify({user: user, pass: pass })
-    }).then(function (response){
-        console.log(response);
-    })
-    */
+    var nIcons;
 
 
+    $.post(apiURL + '/login', { user: user, pass: pass }, function(data) {
+        if(data) {
+            document.location.href = "index.html";
+        } else {
+
+        }
+    });
+
+    e.preventDefault();
 });
 
 /*--------------------------------------
-         Notifications & Dialogs
-     ---------------------------------------*/
-    /*
-     * Notifications
-     */
-    function notify(from, align, icon, type, animIn, animOut){
-        $.growl({
-            icon: icon,
-            title: ' Bootstrap Growl ',
-            message: 'Turning standard Bootstrap alerts into awesome notifications',
-            url: ''
-        },{
-            element: 'body',
-            type: type,
-            allow_dismiss: true,
-            placement: {
-                from: from,
-                align: align
-            },
-            offset: {
-                x: 30,
-                y: 30
-            },
-            spacing: 10,
-            z_index: 1031,
-            delay: 2500,
-            timer: 1000,
-            url_target: '_blank',
-            mouse_over: false,
-            animate: {
-                enter: animIn,
-                exit: animOut
-            },
-            icon_type: 'class',
-            template: '<div data-growl="container" class="alert" role="alert">' +
-            '<button type="button" class="close" data-growl="dismiss">' +
-            '<span aria-hidden="true">&times;</span>' +
-            '<span class="sr-only">Close</span>' +
-            '</button>' +
-            '<span data-growl="icon"></span>' +
-            '<span data-growl="title"></span>' +
-            '<span data-growl="message"></span>' +
-            '<a href="#" data-growl="url"></a>' +
-            '</div>'
-        });
-    };
+    Notifications & Dialogs
+---------------------------------------*/
+/*
+* Notifications
+*/
+function notify(icon, type, title, message){
+    $.growl({
+        icon: icon,
+        title: title,
+        message: message,
+        url: ''
+    },{
+        element: 'body',
+        type: type,
+        allow_dismiss: true,
+        
+        offset: {
+            x: 30,
+            y: 30
+        },
+        spacing: 10,
+        z_index: 1031,
+        delay: 2500,
+        timer: 1000,
+        url_target: '_blank',
+        mouse_over: false,
+        icon_type: 'class',
+        template: '<div data-growl="container" class="alert" role="alert">' +
+        '<button type="button" class="close" data-growl="dismiss">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '<span class="sr-only">Close</span>' +
+        '</button>' +
+        '<span data-growl="icon"></span>' +
+        '<span data-growl="title"></span>' +
+        '<span data-growl="message"></span>' +
+        '<a href="#" data-growl="url"></a>' +
+        '</div>'
+    });
+};
 
 
 $('#frNewAccont').validator().on('submit', function (e) {
+
     if (e.isDefaultPrevented()) {
       // handle the invalid form...
     } else {
-      // everything looks good!
+        // everything looks good!
+        
+        var name = $("#newName").val();
+        var email = $("#newEmail").val();
+        var user = $("#newUser").val();
+        var pass = $("#newPass").val();
+        var isValidUser = false;
+        var nIcons;
 
-      var nFrom, nAlign, nIcons, nAnimIn, nAnimOut;
-      var nType = 'success';
-      notify(nFrom, nAlign, nIcons, nType, nAnimIn, nAnimOut);
+        $.get(apiURL + "/getUserByUsername?user=" + user, function(response) {
+            if($.isEmptyObject(response)) {
+                $.get(apiURL + "/getUserByEmail?email=" + email, function(res) {
+                    if($.isEmptyObject(res)) {
+                        $.post(apiURL + "/createEmployee",{name: name, email: email, user: user, pass: pass }, function(data) {
+                            if(!$.isEmptyObject(data)) {
+                                
+                                notify(nIcons, "success", "Usuario creado! ", "El usuario fue creado satisfactoriamente.");
+
+                                setTimeout(function() { location.reload() }, 3000);
+
+                            } else {
+                                notify(nIcons, "danger", "Ups! ", "Error al crear el usuario.");
+                            } 
+                        })
+                    } else {
+                        notify(nIcons, "warning", "Vaya! ", "Este correo ya existe."); 
+                    }
+                })
+            }else{
+                notify(nIcons, "warning", "Vaya! ", "Este usuario ya existe."); 
+            }
+        });
+        e.preventDefault();
     }
-  });
+});
 
 
   

@@ -14715,6 +14715,8 @@ html:not(.ie9) .select.fg-line:before {
 
 .contacts .c-item .ci-avatar {
   display: block;
+  font-size: 100px;
+  text-align: center;
 }
 
 .contacts .c-item .ci-avatar img {
