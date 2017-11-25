@@ -23,6 +23,7 @@ function Parameter(paramName, paramValue, paramType) {
 
 //SQL Parameters array
 let parameters = [];
+let arrObj = []
 
 //Main SQLHelper object
 var SQLHelper = {
@@ -59,7 +60,9 @@ var SQLHelper = {
             server: this.getIPServer(),
             options: {
                 database: 'CyberDB',
-                useColumnNames: true
+                //useColumnNames: true,
+                useUTC: false,
+                rowCollectionOnDone: true
             }
         }
     },
@@ -73,6 +76,7 @@ var SQLHelper = {
     executeStatement: function(query, isProcedure) {
         var $this = this;
         var parameters = $this.sqlParameters();
+        arrObj = []
 
         return new Promise((resolve, reject) => {
             connection.on('connect', function (err){
@@ -81,7 +85,15 @@ var SQLHelper = {
                         console.log(err);
                         reject(err);
                     }
-                    resolve(rows);
+
+                    if(isProcedure && rowCount > 1) {
+                        rowCount = rowCount - 1
+                    }
+
+                    if(arrObj.length === rowCount) {
+                        resolve(arrObj);
+                    }
+                    
                     console.log(rowCount);
                     connection.close();
                 });
@@ -93,7 +105,12 @@ var SQLHelper = {
                 
                 
                 request.on('row', function(columns) {
-                    resolve(columns);
+                    var item = {}
+                    columns.forEach(function(column) {
+                        item[column.metadata.colName] = column.value; 
+                    });
+                    
+                    arrObj.push(item);
                 });
                 
                 if(isProcedure){

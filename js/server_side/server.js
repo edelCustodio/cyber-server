@@ -2,41 +2,37 @@ let express = require('express')
 let bodyParser = require("body-parser")
 let app = express()
 let usuario = require('../models/usuario')
+let computadora = require('../models/computadora')
 let bcrypt = require('bcrypt-nodejs')
 const moment = require('moment')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+/**
+ * Usuario
+ */
 app.post('/login', function(req, res){
     var user = req.body.user;
     var pass = req.body.pass;
     usuario.login(user, pass).then(function (val) {
-        var password = val.contraseña.value;
-        var idUsuario = val.idUsuario.value;
-        let currentDate = moment();
-        
-        let expirationDate = moment().hours(6).unix()
+        var password = val[0].contraseña;
+        var idUsuario = val[0].idUsuario;
 
         bcrypt.compare(pass, password, function(err, result) {
             // res == true
+            var cDate = new Date()
             if(result) {        
-                usuario.createUserSession(idUsuario, new Date()).then((sessionResult) => {
+                usuario.createUserSession(idUsuario, cDate).then((sessionResult) => {
                     if(sessionResult) {
-
-                        res.json(true);
+                        res.json(sessionResult);
                     }
                 })
-                
-                console.log(res);
-            }else{
+            } else {
                 console.log(err);
             }
-           
         });
-        
     });
-  
 })
 
 app.post('/createEmployee', function(req, res){
@@ -84,5 +80,22 @@ app.get('/getUserInfoByUserName', function(req, res) {
         res.json(response);
     });
 })
+
+/**
+ * Computadora
+ */
+app.get('/getComputers', function(req, res) {
+    computadora.getDesktops().then(function(response){
+        res.json(response);
+    });
+})
+
+app.get('/getDesktopsInUse', function(req, res) {
+    computadora.getDesktopsInUse().then(function(response){
+        res.json(response);
+    });
+})
+
+
 
 app.listen(6868)

@@ -40,7 +40,7 @@
             </div>
 
             <ul class="pull-right h-menu">
-                <li class="hm-search-trigger">
+                <!--<li class="hm-search-trigger">
                     <a href="#" data-ma-action="search-open">
                         <i class="hm-icon zmdi zmdi-search"></i>
                     </a>
@@ -109,7 +109,7 @@
                 </li>
                 <li class="hm-alerts" data-user-alert="sua-messages" data-ma-action="sidebar-open" data-ma-target="user-alerts">
                     <a href="#"><i class="hm-icon zmdi zmdi-notifications"></i></a>
-                </li>
+                </li>-->
                 <li class="dropdown hm-profile">
                     <a data-toggle="dropdown" href="#">
                         <img src="img/profile-pics/1.jpg" alt="">
@@ -119,26 +119,26 @@
                         <li>
                             <a href="profile-about.html"><i class="zmdi zmdi-account"></i> View Profile</a>
                         </li>
-                        <li>
+                        <!--<li>
                             <a href="#"><i class="zmdi zmdi-input-antenna"></i> Privacy Settings</a>
                         </li>
                         <li>
                             <a href="#"><i class="zmdi zmdi-settings"></i> Settings</a>
-                        </li>
+                        </li>-->
                         <li>
                             <a href="#"><i class="zmdi zmdi-time-restore"></i> Logout</a>
                         </li>
                     </ul>
                 </li>
             </ul>
-            
+            <!--
             <div class="media-body h-search">
                 <form class="p-relative">
                     <input type="text" class="hs-input" placeholder="Search for people, files & reports">
                     <i class="zmdi zmdi-search hs-reset" data-ma-action="search-clear"></i>
                 </form>
             </div>
-            
+            -->
         </header>
 
         <section id="main">
@@ -340,8 +340,9 @@
                 <div class="smm-header">
                     <i class="zmdi zmdi-long-arrow-left" data-ma-action="sidebar-close"></i>
                 </div>
-
+                
                 <ul class="smm-alerts">
+                    -
                     <li class="active" data-user-alert="sua-messages" data-ma-action="sidebar-open" data-ma-target="user-alerts">
                         <i class="zmdi zmdi-email"></i>
                     </li>
@@ -351,15 +352,16 @@
                     <li data-user-alert="sua-tasks" data-ma-action="sidebar-open" data-ma-target="user-alerts">
                         <i class="zmdi zmdi-view-list-alt"></i>
                     </li>
+                    
                 </ul>
 
                 <ul class="main-menu">
                     <li class="active">
                         <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
                     </li>
-                    <li><a href="typography.html"><i class="zmdi zmdi-format-underlined"></i> Punto de venta</a></li>
-                    <li><a href="widgets.html"><i class="zmdi zmdi-widgets"></i> Inventario</a></li>
-                    <li><a href="widgets.html"><i class="zmdi zmdi-widgets"></i> Credito</a></li>
+                    <li><a href="typography.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-storage"></i> Inventario</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Credito</a></li>
                     
                 </ul>
             </aside>
@@ -400,107 +402,8 @@
                         </div>
 
                         <div class="card-body card-padding">
-                            <div class="contacts clearfix row">
-                                <div class="col-md-2 col-sm-4 col-xs-6">
-                                    <div class="c-item">
-                                        <a class="ci-avatar">
-                                            <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                                        </a>
-
-                                        <div class="c-info">
-                                            <div class="toggle-switch" data-ts-color="green">
-                                                <!--<label for="ts1" class="ts-label">Toggle Swith Default</label>-->
-                                                <input id="ts1" type="checkbox" hidden="hidden">
-                                                <label for="ts1" class="ts-helper"></label>
-                                            </div>
-                                        </div>
-
-                                        <div class="c-footer">
-                                            <label for="" style="width: 100%; text-align: center">Computer name</label>
-                                            <button class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-xs-6">
-                                    <div class="c-item">
-                                        <a class="ci-avatar">
-                                            <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                                        </a>
-
-                                        <div class="c-info">
-                                            <div class="toggle-switch" data-ts-color="green">
-                                                <!--<label for="ts1" class="ts-label">Toggle Swith Default</label>-->
-                                                <input id="ts2" type="checkbox" hidden="hidden">
-                                                <label for="ts2" class="ts-helper"></label>
-                                            </div>
-                                        </div>
-
-                                        <div class="c-footer">
-                                            <label for="" style="width: 100%; text-align: center">Computer name</label>
-                                            <button class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-xs-6">
-                                    <div class="c-item">
-                                        <a class="ci-avatar">
-                                            <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                                        </a>
-
-                                        <div class="c-info">
-                                            <div class="toggle-switch" data-ts-color="green">
-                                                <!--<label for="ts1" class="ts-label">Toggle Swith Default</label>-->
-                                                <input id="ts3" type="checkbox" hidden="hidden">
-                                                <label for="ts3" class="ts-helper"></label>
-                                            </div>
-                                        </div>
-
-                                        <div class="c-footer">
-                                            <label for="" style="width: 100%; text-align: center">Computer name</label>
-                                            <button class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-xs-6">
-                                    <div class="c-item">
-                                        <a class="ci-avatar">
-                                            <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                                        </a>
-
-                                        <div class="c-info">
-                                            <div class="toggle-switch" data-ts-color="green">
-                                                <!--<label for="ts1" class="ts-label">Toggle Swith Default</label>-->
-                                                <input id="ts4" type="checkbox" hidden="hidden">
-                                                <label for="ts4" class="ts-helper"></label>
-                                            </div>
-                                        </div>
-
-                                        <div class="c-footer">
-                                            <label for="" style="width: 100%; text-align: center">Computer name</label>
-                                            <button class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-xs-6">
-                                    <div class="c-item">
-                                        <a class="ci-avatar">
-                                            <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                                        </a>
-
-                                        <div class="c-info">
-                                            <div class="toggle-switch" data-ts-color="green">
-                                                <!--<label for="ts1" class="ts-label">Toggle Swith Default</label>-->
-                                                <input id="ts5" type="checkbox" hidden="hidden">
-                                                <label for="ts5" class="ts-helper"></label>
-                                            </div>
-                                        </div>
-
-                                        <div class="c-footer">
-                                            <label for="" style="width: 100%; text-align: center">Computer name</label>
-                                            <button disabled class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div id="divComputadoras" class="contacts clearfix row">
+                                
                             </div>
                         </div>
                     </div>
@@ -566,6 +469,7 @@
         <script src="js/functions.js"></script>
         <script src="js/actions.js"></script>
         <script src="js/demo.js"></script>
+        <script src="js/common.js"></script>
         <script src="js/index.js"></script>
         <script id="computadora-tmp" type="text/x-friasoft-tmpl">
             <div class="col-md-2 col-sm-4 col-xs-6">
@@ -576,14 +480,14 @@
         
                     <div class="c-info">
                         <div class="toggle-switch" data-ts-color="green">
-                            <input id="ts{idComputadora}" type="checkbox" hidden="hidden">
-                            <label for="ts{idComputadora}" class="ts-helper"></label>
+                            <input id="stCompu-{idComputadora}" type="checkbox" hidden="hidden">
+                            <label for="stCompu-{idComputadora}" class="ts-helper"></label>
                         </div>
                     </div>
         
                     <div class="c-footer">
                         <label for="" style="width: 100%; text-align: center">{nombreComputadora}</label>
-                        <button class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
+                        <button id="btnCompu-{idComputadora}" disabled class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>

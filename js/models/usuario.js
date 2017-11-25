@@ -1,8 +1,5 @@
 let SQLHelper = require('../server_side/sql-helper.js');
 let TYPES = require('tedious').TYPES;
-const SqlConnection = require("tedious").Connection;
-const Request = require("tedious").Request;
-let connection = null;
 
 var Usuario = {
     login: function (username, pass) {        
