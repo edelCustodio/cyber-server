@@ -1,16 +1,11 @@
 const electron = require('electron')
-const net = require('net');
-let SQLHelper = require('./js/server_side/sql-helper.js');
+let CyberControl = require('./js/server_side/cyber-control.js');
 
 // Module to control application life.
 const app = electron.app
-
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 var server = null;
-
-global.clients = [];
-
 const path = require('path')
 const url = require('url')
 
@@ -52,7 +47,7 @@ function createWindow () {
   });
 
   //Create cyber cafe server
-  createCyberServer();
+  CyberControl.createCyberServer();
 }
 
 // This method will be called when Electron has finished
@@ -80,76 +75,3 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-function createCyberServer() {
-  
-  var host = '127.0.0.1';
-  var port = 6969;
-  
-  // Create a server instance, and chain the listen function to it
-  // The function passed to net.createServer() becomes the event handler for the 'connection' event
-  // The sock object the callback function receives UNIQUE for each connection
-  server = net.createServer(function(sock) {
-    var client = {
-      client: sock,
-      isOnline: true
-    };
-    
-    if(clients.length > 0){
-      for(var i = 0; i < clients.length; i++){
-        if(clients[i].client = client.client){
-          console.log('I already have this client on the list. '+ client.client);
-        }
-      }
-    }
-
-    clients.push(client);
-    // We have a connection - a socket object is assigned to the connection automatically
-    console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
-    
-    // Add a 'data' event handler to this instance of socket
-    sock.on('data', function(data) {
-        
-      var textData = data.toString('utf8');
-      console.log('DATA ' + sock.remoteAddress + ': ' + data);
-      // Write the data back to the socket, the client will receive it as data from the server
-      sock.write('You said "' + textData + '"');
-        
-    });
-    
-    // Add a 'close' event handler to this instance of socket
-    sock.on('close', function(data) {
-        console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
-    });
-
-    sock.on('error', function(data){
-      console.error('Error message: ' + data.message + '\n\nStack' + data.stack);
-    });
-
-    sock.on('clientError', function(data){
-      console.error('Client Error message: ' + data.message + '\n\nStack' + data.stack);
-      
-    });
-    
-    sock.write('hello world\r\n');
-  });
-
-  server.listen(port, host);
-  
-  console.log('Server listening on ' + host +':'+ port);
-}
-
-var serverCookiesHandler = {
-  setCookie: function(username) {
-    
-    mainSession.cookies.set({
-      url: 'http://localhost:6969',
-      name: username,
-      value: username,
-      domain: 'cyber.skynet.com'
-    }, (error) => {
-      console.log(error);
-    })
-  }
-}
-
-module.exports = serverCookiesHandler

@@ -27,7 +27,7 @@ function drawDesktops() {
                 $("#stCompu-" + pc.idComputadora).trigger("click");
             })
             
-            console.log(data);
+            console.log(inUse);
         })    
         
         console.log(data);
@@ -37,7 +37,7 @@ function drawDesktops() {
 }
 
 $(window).load(function () {
-    //Welcome Message (not for login page)
+    
     function notifyLogin(message, type){
         $.growl({
             message: message

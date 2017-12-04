@@ -20,6 +20,15 @@ var Computadora = {
                         AND fechaFin IS NULL`;
         SQLHelper.clearSqlParameters();
         return SQLHelper.executeStatement(query, false);  
+    },
+
+    updateDesktopOnline: function (idComputadora, enLinea) {
+        SQLHelper.createConnection();
+        var query = "servidor.ActualizarEstadoComputadora"
+        SQLHelper.clearSqlParameters();
+        SQLHelper.addSqlParameter(SQLHelper.sqlParameter('idComputadora', idComputadora, TYPES.Int));
+        SQLHelper.addSqlParameter(SQLHelper.sqlParameter('enLinea', enLinea, TYPES.Bit));
+        return SQLHelper.executeStatement(query, true);  
     }
 }
 

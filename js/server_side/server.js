@@ -96,6 +96,4 @@ app.get('/getDesktopsInUse', function(req, res) {
     });
 })
 
-
-
 app.listen(6868)
