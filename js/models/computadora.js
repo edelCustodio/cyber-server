@@ -4,7 +4,7 @@ let TYPES = require('tedious').TYPES;
 var Computadora = {
     getDesktops: function () {
         SQLHelper.createConnection();
-        var query = 'SELECT * FROM [Catalogo].[Computadora]'
+        var query = 'SELECT * FROM [Catalogo].[Computadora] WHERE enLinea = 1'
         SQLHelper.clearSqlParameters();
         return SQLHelper.executeStatement(query, false);  
     },

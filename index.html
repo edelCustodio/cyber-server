@@ -14,6 +14,7 @@
         <link href="vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
         <link href="vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
         <link href="vendors/bower_components/google-material-color/dist/palette.css" rel="stylesheet">
+        <link href="vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">        
         
         
         <!-- CSS -->
@@ -251,15 +252,15 @@
                           </a>
                           <ul class="mfb-component__list">
                             <li>
-                              <a data-toggle="modal" href="#preventClick" data-mfb-label="Crear nota" class="mfb-component__button--child">
+                              <a data-toggle="modal" href="#addTicketItem" data-mfb-label="Crear nota" class="mfb-component__button--child">
                                 <i class="mfb-component__child-icon fa fa-sticky-note-o"></i>
                               </a>
                             </li>
-                            <li>
+                            <!-- <li>
                               <a href="" data-mfb-label="Agregar PC" class="mfb-component__button--child">
                                 <i class="mfb-component__child-icon fa fa-desktop"></i>
                               </a>
-                            </li>
+                            </li> -->
                           </ul>
                         </li>
                       </ul>
@@ -301,7 +302,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="preventClick" data-backdrop="static" data-keyboard="false" 
+        <div class="modal fade" id="addTicketItem" data-backdrop="static" data-keyboard="false" 
             tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -339,6 +340,42 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="startOrStopDesktop" data-backdrop="static" data-keyboard="false" 
+            tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Iniciar registro de computadora.</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Esta seguro que quiere iniciar esta computadora?</p>
+                        <form>
+                            <div class="input-group from-group">
+                                <div class="checkbox m-b-15">
+                                    <label>
+                                        <input id="cbCountDown" type="checkbox" value="">
+                                        <i class="input-helper"></i>
+                                        Desea especificar el tiempo de uso?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group form-group">
+                                <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span>
+                                <div class="dtp-container fg-line disabled">
+                                    <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar">
+                                </div>
+                            </div>
+                            
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnClockStart" type="button" class="btn btn-link waves-effect">Iniciar</button>
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Javascript Libraries -->
         
@@ -357,7 +394,8 @@
         <script src="vendors/bower_components/fullcalendar/dist/fullcalendar.min.js"></script>
         <script src="vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js"></script>
         <script src="vendors/bower_components/salvattore/dist/salvattore.min.js"></script>
-
+        <script src="vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+        
         <script src="vendors/bower_components/flot/jquery.flot.js"></script>
         <script src="vendors/bower_components/flot/jquery.flot.resize.js"></script>
         <script src="vendors/bower_components/flot.curvedlines/curvedLines.js"></script>

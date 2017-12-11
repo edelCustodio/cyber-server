@@ -15,18 +15,19 @@ var CyberControl = {
         server = net.createServer(function(sock) {
             var client = {
                 sock: sock,
-                isOnline: true
+                isOnline: true,
+                data: {}
             };
             
             if (clients.length > 0) {
                 for (var i = 0; i < clients.length; i++) {
-                    if (clients[i].client.remoteAddress === client.sock.remoteAddress) {
+                    if (clients[i].sock.remoteAddress === client.sock.remoteAddress) {
                         console.log('I already have this client on the list. '+ client.sock.remoteAddress);
                     }else{
                         clients.push(client);
                     }
                 }
-            }else{
+            } else {
                 clients.push(client);
             }
         
@@ -37,18 +38,18 @@ var CyberControl = {
             // Add a 'data' event handler to this instance of socket
             sock.on('data', function(data) {
                 
-                
-
                 var textData = data.toString('utf8');
-                var jsonData = JSON.parse(textData);
+                var jsonData = JSON.parse(textData)[0];
 
-                //Update estado computadora para saber si esta en linea o no.
+                for(var i = 0; i < clients.length; i++) {
+                    if(clients[i].sock.remoteAddress === jsonData.IP){
+                        clients[i].data = jsonData;
+                    }
+                }                
+
+                //Actualizar estado computadora para saber si esta en linea o no.
                 Desktop.updateDesktopOnline(jsonData.idComputadora, true);
 
-                console.log('DATA ' + sock.remoteAddress + ': ' + data);
-                // Write the data back to the socket, the client will receive it as data from the server
-                sock.write('You said "' + textData + '"');
-              
             });
           
             // Add a 'close' event handler to this instance of socket
@@ -65,10 +66,8 @@ var CyberControl = {
         
             sock.on('clientError', function(data){
                 console.error('Client Error message: ' + data.message + '\n\nStack' + data.stack);
-                
             });
             
-            sock.write('hello world\r\n');
         });
       
         server.listen(port, host);
