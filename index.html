@@ -228,8 +228,8 @@
                     <li class="active">
                         <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
                     </li>
-                    <li><a href="typography.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
-                    <li><a href="widgets.html"><i class="zmdi zmdi-storage"></i> Inventario</a></li>
+                    <li><a href="./html/punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-storage" ></i> Inventario</a></li>
                     <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
                     
                 </ul>
@@ -252,7 +252,7 @@
                           </a>
                           <ul class="mfb-component__list">
                             <li>
-                              <a data-toggle="modal" href="#addTicketItem" data-mfb-label="Crear nota" class="mfb-component__button--child">
+                              <a data-toggle="modal" id="showAddProductModal" data-mfb-label="Agregar producto" class="mfb-component__button--child">
                                 <i class="mfb-component__child-icon fa fa-sticky-note-o"></i>
                               </a>
                             </li>
@@ -307,35 +307,87 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Modal title</h4>
+                        <h4 class="modal-title">Agregar servicio.</h4>
                     </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="form-group fg-float">
-                                <div class="fg-line">
-                                    <div class="select">
-                                        <select id="" class="form-control">
-                                            <option>Selecciona una computadora</option>
-                                            <option>Option 1</option>
-                                            <option>Option 2</option>
-                                            <option>Option 3</option>
-                                            <option>Option 4</option>
-                                            <option>Option 5</option>
-                                        </select>
+                    <div class="modal-body container">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <div class="select">
+                                            <select id="sDesktops" class="form-control"></select>
+                                        </div>
                                     </div>
                                 </div>
-                                <small class="help-block with-errors"></small>
                             </div>
-                            <div class="form-group">
-                                <div class="fg-line">
-                                    <textarea class="form-control" rows="5" placeholder="Escribe comentarios asociados a la computadora...."></textarea>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <div class="select">
+                                            <select id="sProductos" class="form-control"></select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iCantidad" class="form-control" placeholder="cantidad">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iPrecio" class="form-control" placeholder="precio">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iTotal" class="form-control" placeholder="total">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <button class="btn btn-success waves-effect">Agregar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Producto</th>
+                                                    <th>Precio</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbListProducts">
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>Alexandra</td>
+                                                    <td>Christopher</td>
+                                                    <td>@makinton</td>
+                                                    <td>Ducky</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-link waves-effect">Save changes</button>
-                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-link waves-effect">Agregar</button>
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -416,6 +468,7 @@
         <script src="js/demo.js"></script>
         <script src="js/common.js"></script>
         <script src="js/index.js"></script>
+        
         <script id="computadora-tmp" type="text/x-friasoft-tmpl">
             <div class="col-md-2 col-sm-4 col-xs-6">
                 <div class="c-item">

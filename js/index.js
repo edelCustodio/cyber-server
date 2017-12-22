@@ -5,6 +5,7 @@ let fullName = "";
 var remote = require('electron').remote;
 var _arrClients = null;
 var _input = null;
+const Enumerable = require('linq');
 
 //document ready
 $(document).ready(function () {
@@ -33,6 +34,13 @@ function drawDesktops() {
             console.log(inUse);
         });
         
+        if (sessionStorage.getItem('desktops')  === null)
+            sessionStorage.setItem('desktops', JSON.stringify(data));
+        else {
+            sessionStorage.removeItem('desktops');
+            sessionStorage.setItem('desktops', JSON.stringify(data));
+        }
+
         console.log(data);
     });
 }
@@ -132,6 +140,7 @@ $(document).off('click', '#cbCountDown').on('click', '#cbCountDown', function ()
 
 })
 
+//obtener the toggle checkbox input 
 function getCheckboxDesktop(element) {
     var input = null;
     if(element.hasClass("ci-avatar")) {
@@ -149,6 +158,7 @@ function getCheckboxDesktop(element) {
     return input;
 }
 
+//Canbiar color a la imagen de la computadora
 function changeColorDesktopIcon() {
     var desktopIcon = _input.parent().parent().parent().find("a > i.fa")
     if(_input.is(":checked"))
@@ -158,6 +168,7 @@ function changeColorDesktopIcon() {
     
 }
 
+//Iniciar o detener el reloj contador para la computadora seleccionada
 function startDesktop() {
     
     var start = false;
@@ -186,6 +197,7 @@ function startDesktop() {
     client.sock.write(JSON.stringify(message));
 }
 
+//Obtener las maquinas logueadas en el servidor
 function getDesktopClient() {
     var client = {};
     
@@ -199,4 +211,75 @@ function getDesktopClient() {
     }
 
     return client;
+}
+
+//show add product modal and fill out the fields
+$('#showAddProductModal').click(function () {
+    
+    var $sDesktops = $('#sDesktops');
+    var $sProducts = $('#sProductos');
+
+    $sDesktops.empty();
+    $sProducts.empty();
+
+    //fill out computadora select element
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    $sDesktops.append($("<option />").val('0').text('Seleccione una computadora'));
+    $.each(desktops, function() {
+        $sDesktops.append($("<option />").val(this.idComputadora).text(this.nombre));
+    });
+
+    //get products
+    $.get(apiURL + "/getProducts", function(data) {
+        var products = data;
+        $sProducts.append($("<option />").val('0').text('Seleccione un producto'));
+        $.each(products, function() {
+            if(this.idProducto > 1)
+                $sProducts.append($("<option />").val(this.idProducto).text(this.nombre));
+        });
+
+        if (sessionStorage.getItem('products') === null)
+            sessionStorage.setItem('products', JSON.stringify(products));
+    });
+
+    //show modal
+    $('#addTicketItem').modal('show');
+});
+
+//Seleccionar computadora, comprobar si existen productos asociados a la computadora seleccionada
+//si existe, mostrarlos en el grid
+$('#sDesktops').change(function () {
+    var idComputadora = parseInt($(this).val());
+});
+
+//Agregar productos al ticket con la computadora seleccionada
+function addProductToTicket() {
+    
+    var idProducto = $('#sProducto').val();
+    var nombre = $('#sProducto').text();
+    var cantidad = $('#iCantidad').val();
+    var precio = $('#iPrecio').val();
+    var total = $('#iTotal').val();
+
+    var desktopData = [];
+    var producto = {
+        idProducto: idProducto,
+		nombre: nombre,
+		precio: precio,
+		cantidad: cantidad,
+		total: total
+    }
+
+    if (sessionStorage.getItem('desktopData') !== null)
+        desktopData = JSON.parse(sessionStorage.getItem('desktopData'));
+    
+    if (desktopData.length > 0) {
+        //search for desktop data
+        var desktopInfo = Enumerable.From(desktopData).Where(w => w.idComputadora === idComputadora).FirstOrDefault();
+    } else {
+        var ticket = {
+            idComputadora: idComputadora,
+            productos: [producto]
+        }
+    }
 }

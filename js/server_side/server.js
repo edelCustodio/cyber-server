@@ -3,6 +3,7 @@ let bodyParser = require("body-parser")
 let app = express()
 let usuario = require('../models/usuario')
 let computadora = require('../models/computadora')
+let producto = require('../models/producto')
 let bcrypt = require('bcrypt-nodejs')
 const moment = require('moment')
 
@@ -95,5 +96,15 @@ app.get('/getDesktopsInUse', function(req, res) {
         res.json(response);
     });
 })
+
+/**
+ * Producto
+ */
+app.get('/getProducts', function(req, res) {
+    producto.getProducts().then(function(response){
+        res.json(response);
+    });
+})
+
 
 app.listen(6868)
