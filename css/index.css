@@ -1,0 +1,6 @@
+@import url('../node_modules/font-awesome/css/font-awesome.min.css');
+@import url('../node_modules/mfb/src/mfb.css');
+
+a.ci-avatar {
+    cursor: pointer;
+}

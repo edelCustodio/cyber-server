@@ -1,6 +1,5 @@
 const net = require('net');
 const ip = require('ip');
-let Desktop = require('../models/computadora')
 
 global.clients = [];
 
@@ -39,7 +38,7 @@ var CyberControl = {
             sock.on('data', function(data) {
                 
                 var textData = data.toString('utf8');
-                var jsonData = JSON.parse(textData)[0];
+                var jsonData = JSON.parse(textData);
 
                 for(var i = 0; i < clients.length; i++) {
                     if(clients[i].sock.remoteAddress === jsonData.IP){
@@ -48,7 +47,7 @@ var CyberControl = {
                 }                
 
                 //Actualizar estado computadora para saber si esta en linea o no.
-                Desktop.updateDesktopOnline(jsonData.idComputadora, true);
+                // Desktop.updateDesktopOnline(jsonData.idComputadora, true);
 
             });
           
@@ -76,7 +75,23 @@ var CyberControl = {
     },
 
     getIP: function () {
-        return ip.address();
+        var ipAddress = '';
+
+        try {
+            var ipEthernet = ip.address('Ethernet');
+            ipAddress = ipEthernet;
+        } catch (e) {
+            
+        }
+
+        try {
+            var ipWifi = ip.address('Wi-Fi');
+            ipAddress = ipWifi;
+        } catch (e) {
+            
+        }
+        
+        return ipAddress;
     }
 }
 

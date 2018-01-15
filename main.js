@@ -29,12 +29,12 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'login.html'),
+    pathname: path.join(__dirname, 'html/login.html'),
     protocol: 'file:',
     slashes: true
   }))
 
-  let server = require('./js/server_side/server')
+  //let server = require('./js/server_side/server')
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
 

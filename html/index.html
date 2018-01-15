@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+    
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Skynet</title>
+
+        <!-- Vendor CSS -->
+        <link href="../libs/css/fullcalendar.min.css" rel="stylesheet">
+        <link href="../libs/css/animate.min.css" rel="stylesheet">       
+        <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
+        <link href="../libs/css/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
+        <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
+        <link href="../libs/css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
+        
+        
+        <!-- CSS -->
+        <link href="../css/app.min.1.css" rel="stylesheet">
+        <link href="../css/app.min.2.css" rel="stylesheet"> 
+        <link href="../css/index.css" rel="stylesheet"> 
+        
+    </head>
+    <body data-ma-header="teal">
+        <header id="header" class="media">
+            <div class="pull-left h-logo">
+                <a href="index.html" class="hidden-xs">
+                    Skynet   
+                    <small>Cyber admin</small>
+                </a>
+                
+                <div class="menu-collapse" data-ma-action="sidebar-open" data-ma-target="main-menu">
+                    <div class="mc-wrap">
+                        <div class="mcw-line top palette-White bg"></div>
+                        <div class="mcw-line center palette-White bg"></div>
+                        <div class="mcw-line bottom palette-White bg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="pull-right h-menu">
+                <!--<li class="hm-search-trigger">
+                    <a href="#" data-ma-action="search-open">
+                        <i class="hm-icon zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                
+                <li class="dropdown hidden-xs hidden-sm h-apps">
+                    <a data-toggle="dropdown" href="#">
+                        <i class="hm-icon zmdi zmdi-apps"></i>
+                    </a>
+                    <ul class="dropdown-menu pull-right">
+                        <li>
+                            <a href="#">
+                                <i class="palette-Red-400 bg zmdi zmdi-calendar"></i>
+                                <small>Calendar</small>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="#">
+                                <i class="palette-Green-400 bg zmdi zmdi-file-text"></i>
+                                <small>Files</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Light-Blue bg zmdi zmdi-email"></i>
+                                <small>Mail</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Orange-400 bg zmdi zmdi-trending-up"></i>
+                                <small>Analytics</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Purple-300 bg zmdi zmdi-view-headline"></i>
+                                <small>News</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Blue-Grey bg zmdi zmdi-image"></i>
+                                <small>Gallery</small>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown hidden-xs">
+                    <a data-toggle="dropdown" href="#"><i class="hm-icon zmdi zmdi-more-vert"></i></a>
+                    <ul class="dropdown-menu dm-icon pull-right">
+                        <li class="hidden-xs">
+                            <a data-action="fullscreen" href="#"><i class="zmdi zmdi-fullscreen"></i> Toggle Fullscreen</a>
+                        </li>
+                        <li>
+                            <a data-action="clear-localstorage" href="#"><i class="zmdi zmdi-delete"></i> Clear Local Storage</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-face"></i> Privacy Settings</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-settings"></i> Other Settings</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="hm-alerts" data-user-alert="sua-messages" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                    <a href="#"><i class="hm-icon zmdi zmdi-notifications"></i></a>
+                </li>-->
+                <li class="dropdown hm-profile">
+                    <a data-toggle="dropdown" href="#">
+                        <img src="../img/1.jpg" alt="">
+                    </a>
+                    
+                    <ul class="dropdown-menu pull-right dm-icon">
+                        <li>
+                            <a href="profile-about.html"><i class="zmdi zmdi-account"></i> View Profile</a>
+                        </li>
+                       
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-time-restore"></i> Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!--
+            <div class="media-body h-search">
+                <form class="p-relative">
+                    <input type="text" class="hs-input" placeholder="Search for people, files & reports">
+                    <i class="zmdi zmdi-search hs-reset" data-ma-action="search-clear"></i>
+                </form>
+            </div>
+            -->
+        </header>
+
+        <section id="main">
+            <aside id="s-user-alerts" class="sidebar">
+                <ul class="tab-nav tn-justified tn-icon m-t-10" data-tab-color="teal">
+                    <!--<li><a class="sua-messages" href="#sua-messages" data-toggle="tab"><i class="zmdi zmdi-email"></i></a></li>-->
+                    <li><a class="sua-notifications" href="#sua-notifications" data-toggle="tab"><i class="zmdi zmdi-notifications"></i></a></li>
+                </ul>
+
+                <div class="tab-content">
+                    
+                    <div class="tab-pane fade" id="sua-notifications">
+                        <ul class="sua-menu list-inline list-unstyled palette-Orange bg">
+                            <li><a href="#"><i class="zmdi zmdi-volume-off"></i> Mute</a></li>
+                            <li><a href="#"><i class="zmdi zmdi-long-arrow-tab"></i> View all</a></li>
+                            <li><a href="#" data-ma-action="sidebar-close"><i class="zmdi zmdi-close"></i> Close</a></li>
+                        </ul>
+
+                        <div class="list-group lg-alt c-overflow">
+                            <a href="#" class="list-group-item media">
+                                <div class="pull-left">
+                                    <img class="avatar-img" src="../img/1.jpg" alt="">
+                                </div>
+
+                                <div class="media-body">
+                                    <div class="lgi-heading">David Villa Jacobs</div>
+                                    <small class="lgi-text">Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam mattis lobortis sapien non posuere</small>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item media">
+                                <div class="pull-left">
+                                    <img class="avatar-img" src="../img/5.jpg" alt="">
+                                </div>
+                                <div class="media-body">
+                                    <div class="lgi-heading">Candice Barnes</div>
+                                    <small class="lgi-text">Quisque non tortor ultricies, posuere elit id, lacinia purus curabitur.</small>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item media">
+                                <div class="pull-left">
+                                    <img class="avatar-img" src="../img/3.jpg" alt="">
+                                </div>
+                                <div class="media-body">
+                                    <div class="lgi-heading">Jeannette Lawson</div>
+                                    <small class="lgi-text">Donec congue tempus ligula, varius hendrerit mi hendrerit sit amet. Duis ac quam sit amet leo feugiat iaculis</small>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item media">
+                                <div class="pull-left">
+                                    <img class="avatar-img" src="../img/4.jpg" alt="">
+                                </div>
+                                <div class="media-body">
+                                    <div class="lgi-heading">Darla Mckinney</div>
+                                    <small class="lgi-text">Duis tincidunt augue nec sem dignissim scelerisque. Vestibulum rhoncus sapien sed nulla aliquam lacinia</small>
+                                </div>
+                            </a>
+
+                            <a href="#" class="list-group-item media">
+                                <div class="pull-left">
+                                    <img class="avatar-img" src="../img/2.jpg" alt="">
+                                </div>
+                                <div class="media-body">
+                                    <div class="lgi-heading">Rudolph Perez</div>
+                                    <small class="lgi-text">Phasellus a ullamcorper lectus, sit amet viverra quam. In luctus tortor vel nulla pharetra bibendum</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </aside>
+
+            <aside id="s-main-menu" class="sidebar">
+                <div class="smm-header">
+                    <i class="zmdi zmdi-long-arrow-left" data-ma-action="sidebar-close"></i>
+                </div>
+                
+                <ul class="smm-alerts">
+                   
+                    <li class="active"  data-user-alert="sua-notifications" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                        <i class="zmdi zmdi-notifications"></i>
+                    </li>
+                    
+                    
+                </ul>
+
+                <ul class="main-menu">
+                    <li class="active">
+                        <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
+                    </li>
+                    <li><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-storage" ></i> Inventario</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
+                    
+                </ul>
+            </aside>
+
+            <section id="content">
+                <div class="container">
+                    <div class="c-header">
+                        <h2>Control de ciber</h2>
+                    </div>
+
+                    <!-- Add button
+                    <button class="btn btn-float btn-danger m-btn"><i class="zmdi zmdi-plus"></i></button> -->
+
+                    <ul id="menu" class="mfb-component--br mfb-zoomin" data-mfb-toggle="hover">
+                        <li class="mfb-component__wrap">
+                          <a href="#" class="mfb-component__button--main">
+                            <i class="mfb-component__main-icon--resting zmdi fa fa-plus"></i>
+                            <i class="mfb-component__main-icon--active fa fa-times"></i>
+                          </a>
+                          <ul class="mfb-component__list">
+                            <li>
+                              <a data-toggle="modal" id="showAddProductModal" data-mfb-label="Agregar producto" class="mfb-component__button--child">
+                                <i class="mfb-component__child-icon fa fa-sticky-note-o"></i>
+                              </a>
+                            </li>
+                            <!-- <li>
+                              <a href="" data-mfb-label="Agregar PC" class="mfb-component__button--child">
+                                <i class="mfb-component__child-icon fa fa-desktop"></i>
+                              </a>
+                            </li> -->
+                          </ul>
+                        </li>
+                      </ul>
+
+                    <div class="card">
+                        <div class="action-header palette-Teal-400 bg clearfix">
+                            <div class="ah-label hidden-xs palette-White text">Computadoras disponibles</div>
+                        </div>
+
+                        <div class="card-body card-padding">
+                            <div id="divComputadoras" class="contacts clearfix row">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer id="footer">
+                Copyright &copy; 2017 friasoftIt
+
+                <ul class="f-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </footer>
+
+        </section>
+
+        <!-- Page Loader -->
+        <div class="page-loader palette-Teal bg">
+            <div class="preloader pl-xl pls-white">
+                <svg class="pl-circular" viewBox="25 25 50 50">
+                    <circle class="plc-path" cx="50" cy="50" r="20"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addTicketItem" data-backdrop="static" data-keyboard="false" 
+            tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Agregar producto o servicio</h4>
+                    </div>
+                    <div class="modal-body container">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <div class="select">
+                                            <select id="sDesktops" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <div class="select">
+                                            <select id="sProductos" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iCantidad" class="form-control" placeholder="cantidad">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iPrecio" class="form-control" disabled placeholder="precio">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <input type="text" id="iTotal" class="form-control" disabled placeholder="total">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <button id="btnAgregarProducto" class="btn btn-success waves-effect">Agregar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>#</th>
+                                                    <th>Producto</th>
+                                                    <th>Precio</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbListProducts">
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-link waves-effect">Agregar</button> -->
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="startOrStopDesktop" data-backdrop="static" data-keyboard="false" 
+            tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Iniciar registro de computadora.</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Esta seguro que quiere iniciar esta computadora?</p>
+                        <form>
+                            <div class="input-group from-group">
+                                <div class="checkbox m-b-15">
+                                    <label>
+                                        <input id="cbCountDown" type="checkbox" value="">
+                                        <i class="input-helper"></i>
+                                        Desea especificar el tiempo de uso?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group form-group">
+                                <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span>
+                                <div class="dtp-container fg-line disabled">
+                                    <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar">
+                                </div>
+                            </div>
+                            
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnClockStart" type="button" class="btn btn-link waves-effect">Iniciar</button>
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <script src="../js/common.js"></script>
+        <!-- Javascript Libraries -->
+        <script src="../libs/js/bootstrap.min.js"></script>
+       
+        <!--<script src="./vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>-->
+        <script src="../libs/js/waves.min.js"></script>
+        <script src="../libs/js/bootstrap-growl.min.js"></script>
+        <script src="../libs/js/moment.min.js"></script>
+        <script src="../libs/js/fullcalendar.min.js"></script>
+        <script src="../libs/js/jquery.simpleWeather.min.js"></script>
+        <script src="../libs/js/salvattore.min.js"></script>
+        
+        <script src="../libs/js/jquery.flot.js"></script>
+        <script src="../libs/js/jquery.flot.resize.js"></script>
+        <script src="../libs/js/curvedLines.js"></script>
+        <script src="../libs/js/jquery.sparkline.min.js"></script>
+        <script src="../libs/js/mfb.min.js"></script>
+        
+        
+
+        <!-- Placeholder for IE9 -->
+        <!--[if IE 9 ]>
+        <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
+        <![endif]-->
+        
+        <script src="../js/functions.js"></script>
+        <script src="../js/actions.js"></script>
+        <script src="../js/demo.js"></script>
+        
+        <script src="../js/client_side/index.js"></script>
+        
+        <script id="computadora-tmp" type="text/x-friasoft-tmpl">
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="c-item">
+                    <a class="ci-avatar">
+                        <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
+                    </a>
+        
+                    <div class="c-info">
+                        <div class="toggle-switch" data-ts-color="green">
+                            <input id="stCompu-{idComputadora}" type="checkbox" hidden="hidden">
+                            <label for="stCompu-{idComputadora}" class="ts-helper"></label>
+                        </div>
+                    </div>
+        
+                    <div class="c-footer">
+                        <label for="" style="width: 100%; text-align: center">{nombreComputadora}</label>
+                        <button id="btnCompu-{idComputadora}" disabled class="btn btn-default waves-effect"><i class="fa fa-bell" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+            </div>
+        </script>
+        <script id="trRowGridTicket" type="text/x-friasoft-tmpl">
+            <tr>
+                <td class="text-left">
+                    <button 
+                        id="delete-{idComputadora}-{idProducto}"
+                        type="button" 
+                        class="btn btn-icon command-delete waves-effect waves-circle" 
+                        data-row-id="10253">
+                        <span class="zmdi zmdi-delete"></span>
+                    </button>
+                </td>
+                <td>{contador}</td>
+                <td>{nombre}</td>
+                <td>$ {precio}</td>
+                <td>{cantidad}</td>
+                <td>$ {total}</td>
+            </tr>
+        </script>
+    </body>
+</html>
