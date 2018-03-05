@@ -4,8 +4,11 @@ window.$ = window.jQuery = require('../libs/js/jquery.min.js');
 const Enumerable = require('linq');
 require('bootstrap-validator')
 require('../libs/js/jquery.mCustomScrollbar')
+var { ipcRenderer, remote } = require('electron');
 
-
+$(document).ready(function () {
+    getProducts();
+});
 
 /*--------------------------------------
     Notifications & Dialogs
@@ -109,7 +112,7 @@ $('#sProductos').change(function () {
 /**
  * Permitir solo numeros en el input de cantidad
  */
-$( "#iCantidad" ).keydown(function (e) {
+$( "#iCantidad").keydown(function (e) {
     // Allow: backspace, delete, tab, escape, enter and .
     if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
         // Allow: Ctrl+A, Command+A
@@ -149,15 +152,18 @@ $( "#iCantidad" ).keyup(function() {
                 total = parseInt(cantidad) * parseFloat(precio);
                 $('#iTotal').val(total); 
                 alertNotify('Ups!', 'La cantidad debe de ser menor o igual que lo disponible.', 'warning');  
-            }   
-        }
+            }
+            
+            $('#btnAgregarProducto').removeAttr('disabled');
+        } else 
+            $('#btnAgregarProducto').attr('disabled', true);
     } else {
         alertNotify('Ups!', 'Por favor, seleccione un producto', 'warning');
     }
 });
 
 /**
- * get Product from sessionStorage
+ * Obtener producto desde sessionStorage
  * @param {*} idProducto 
  */
 function getProductSelected(idProducto) {
@@ -168,9 +174,9 @@ function getProductSelected(idProducto) {
     return producto;
 }
 
-
-
-
+/**
+ * Obtener productos desde base de datos
+ */
 function getProducts() {
     var $sProducts = $('#sProductos');
     $sProducts.empty();
@@ -178,7 +184,7 @@ function getProducts() {
      //get products
      $.get(apiURL + "/api/getProducts", function(data) {
         var products = data;
-        $sProducts.append($("<option />").val('0').text('Seleccione un producto'));
+        $sProducts.append($("<option />").val(0).text('Seleccione un producto...'));
         $.each(products, function() {
             if(this.idProducto > 1)
                 $sProducts.append($("<option />").val(this.idProducto).text(this.nombre));
@@ -190,6 +196,24 @@ function getProducts() {
             sessionStorage.removeItem('products');
             sessionStorage.setItem('products', JSON.stringify(products));
         }
+
+        if($('.chosen')[0]) {
+            $('.chosen').chosen({
+                width: '100%'
+            });
+        }
+    
+    });
+}
+
+function fillDesktopDropdown() {
+    var $sDesktops = $('#sDesktops');
+    $sDesktops.empty();
+    //fill out computadora select element
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    $sDesktops.append($("<option />").val(0).text('Seleccione una computadora'));
+    $.each(desktops, function() {
+        $sDesktops.append($("<option />").val(this.idComputadora).text(this.nombre));
     });
 }
 
@@ -223,7 +247,7 @@ $(document).off('click', 'button[id^="delete"]').on('click', 'button[id^="delete
     //remove product from tickets array
     $.each(tickets, function(i, t) {
         t.productos = $.grep(t.productos, function(p) { 
-            return p.idProducto != idProducto; 
+            return p.idProducto !== idProducto; 
         });
 
         if (t.productos.length === 0)
@@ -232,7 +256,7 @@ $(document).off('click', 'button[id^="delete"]').on('click', 'button[id^="delete
 
     if (deleteDesktop) {
         tickets = $.grep(tickets, function(t) { 
-            return t.idComputadora != idComputadora; 
+            return t.idComputadora !== idComputadora; 
         });
     }
 
@@ -243,7 +267,7 @@ $(document).off('click', 'button[id^="delete"]').on('click', 'button[id^="delete
         sessionStorage.setItem('tickets', JSON.stringify(tickets));
     
     //recreate grid ticket product
-    createGridProduct();
+    createGridProduct(idComputadora);
 });
 
 //Agregar productos al ticket con la computadora seleccionada
@@ -256,6 +280,7 @@ function addProductToTicket() {
     var cantidad = $('#iCantidad').val();
     var precio = $('#iPrecio').val();
     var total = $('#iTotal').val();
+
     var ticket = {
         idComputadora: 0,
         nombreComputadora: '',
@@ -278,26 +303,15 @@ function addProductToTicket() {
 
         //if there is an existing product, update its values
         if(productoExistente !== null && !$.isEmptyObject(productoExistente)) {
-            $.each(tickets, function(i, t) {
-                if (t.idComputadora === idComputadora) {
-                    $.each(t.productos, function (i, p) {
-                        if (p.idProducto === producto.idProducto) {
-                            p.cantidad = producto.cantidad;
-                            p.total = producto.total;
-                        }
-                    })
-                }
-            });
+            productoExistente.cantidad = producto.cantidad;
+            productoExistente.total = producto.total;
+            productoExistente.precio = producto.precio;
         } else { //add new product
             //validate if there is an existing desktop on tickets
             var ticketExist = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).firstOrDefault();
 
             if (ticketExist !== null && !$.isEmptyObject(ticketExist)) {
-                $.each(tickets, function(i, t) {
-                    if (t.idComputadora === idComputadora) {    
-                        t.productos.push(producto);
-                    }
-                });
+                ticketExist.productos.push(producto);
             } else {
                 ticket.idComputadora = idComputadora;
                 ticket.nombreComputadora = nombreComputadora;
@@ -316,15 +330,28 @@ function addProductToTicket() {
     sessionStorage.setItem('tickets', JSON.stringify(tickets));
 
     //recreate grid ticket product
-    createGridProduct();
+    createGridProduct(idComputadora);
+
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+
+    var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === idComputadora).select(s => s.nombre).firstOrDefault();
+    $('#hDesktopName').html(desktopName);
+    $('#btnPagar').removeAttr('disabled');
+
+    // clean controls
+    $('#iCantidad').val('');
+    $('#iPrecio').val('');
+    $('#iTotal').val('');
+    // dropdown product
+    $('.chosen-single span').html('');
 }
 
 /**
  * Create or build the full grid ticket product to show the product list associated to the desktop.
  */
-function createGridProduct() {
+function createGridProduct(idComputadora) {
     $('#tbListProducts').empty();
-    var idComputadora = parseInt($('#sDesktops').val());
+    // var idComputadora = parseInt($('#sDesktops').val());
     var tickets = JSON.parse(sessionStorage.getItem('tickets'));
     var productos = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).select(s => s.productos).firstOrDefault();
 
@@ -345,4 +372,70 @@ function createGridProduct() {
         $('#tbListProducts').append(gridProduct);
     }
 }
-    
+
+/**
+ * limpiar todos los controles del grid
+ */
+function cleanGridAndProductControls() {
+    // Limpiar el grid
+    $('#sDesktops').val(0);
+    $('#tbListProducts').empty();
+    $('#iCantidad').val('');
+    $('#iPrecio').val('');
+    $('#iTotal').val('');
+
+    // dropdown product
+    $('.chosen-single span').html('');
+
+    // close the modal
+    $('#addTicketItem').modal('toggle')
+}
+
+/**
+ * *********************************************************************
+ * *********************************************************************
+ * *********************************************************************
+ * *********************************************************************
+ * *********************************************************************
+ */
+
+/**
+ * Evento que se ejecuta cuando el tiempo de alguna maquina se agota
+ */
+ipcRenderer.on('time-off', (event, arg) => {
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    var desktop = Enumerable.from(desktops).where(w => w.nombre === arg).firstOrDefault();
+    _input = $('#stCompu-' + desktop.idComputadora);
+    _input.prop("checked", false);
+    changeColorDesktopIcon();
+    saveDesktopToPurchase(desktop);
+
+    /*
+    const modalPath = path.join('file://', __dirname, '/modal.html')
+    let win = new BrowserWindow({ width: 400, height: 320 })
+    win.on('close', function () { win = null })
+    win.loadURL(modalPath)
+    win.show();
+    win.webContents.send('message', JSON.stringify(desktop));
+    */
+});
+
+/**
+ * Obtener los registros del tiempo de uso de cada computadora y almacenarlo en el sessionStorage
+ */
+ipcRenderer.on('record', (event, arg) => {
+    var records = [];
+    if (sessionStorage.getItem('desktopRecords') !== null) {
+        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
+
+        var record = JSON.parse(arg);
+        var findRecord = Enumerable.from(records).where(w => w.idRegistro === record.idRegistro).firstOrDefault();
+
+        if (findRecord === undefined) {
+            records.push(record);
+            sessionStorage.setItem('desktopRecords', JSON.stringify(records));
+        }
+    } else {
+        sessionStorage.setItem('desktopRecords', JSON.stringify(records.push(JSON.parse(arg))));
+    }
+});

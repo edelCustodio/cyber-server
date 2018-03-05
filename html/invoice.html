@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Skynet</title>
+
+        <!-- Vendor CSS -->
+        
+        <link href="../libs/css/animate.min.css" rel="stylesheet">
+        <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
+        <link href="../libs/css/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
+        <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
+        
+      
+        
+        
+        <!-- CSS -->
+        <link href="../css/app.min.1.css" rel="stylesheet">
+        <link href="../css/app.min.2.css" rel="stylesheet"> 
+        
+        
+    </head>
+    <body data-ma-header="teal">
+        <header id="header" class="media">
+            <div class="pull-left h-logo">
+                <a href="index.html" class="hidden-xs">
+                    Skynet   
+                    <small>Cyber admin</small>
+                </a>
+                
+                <div class="menu-collapse" data-ma-action="sidebar-open" data-ma-target="main-menu">
+                    <div class="mc-wrap">
+                        <div class="mcw-line top palette-White bg"></div>
+                        <div class="mcw-line center palette-White bg"></div>
+                        <div class="mcw-line bottom palette-White bg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="pull-right h-menu">
+                <!--<li class="hm-search-trigger">
+                    <a href="#" data-ma-action="search-open">
+                        <i class="hm-icon zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                
+                <li class="dropdown hidden-xs hidden-sm h-apps">
+                    <a data-toggle="dropdown" href="#">
+                        <i class="hm-icon zmdi zmdi-apps"></i>
+                    </a>
+                    <ul class="dropdown-menu pull-right">
+                        <li>
+                            <a href="#">
+                                <i class="palette-Red-400 bg zmdi zmdi-calendar"></i>
+                                <small>Calendar</small>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="#">
+                                <i class="palette-Green-400 bg zmdi zmdi-file-text"></i>
+                                <small>Files</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Light-Blue bg zmdi zmdi-email"></i>
+                                <small>Mail</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Orange-400 bg zmdi zmdi-trending-up"></i>
+                                <small>Analytics</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Purple-300 bg zmdi zmdi-view-headline"></i>
+                                <small>News</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Blue-Grey bg zmdi zmdi-image"></i>
+                                <small>Gallery</small>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown hidden-xs">
+                    <a data-toggle="dropdown" href="#"><i class="hm-icon zmdi zmdi-more-vert"></i></a>
+                    <ul class="dropdown-menu dm-icon pull-right">
+                        <li class="hidden-xs">
+                            <a data-action="fullscreen" href="#"><i class="zmdi zmdi-fullscreen"></i> Toggle Fullscreen</a>
+                        </li>
+                        <li>
+                            <a data-action="clear-localstorage" href="#"><i class="zmdi zmdi-delete"></i> Clear Local Storage</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-face"></i> Privacy Settings</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-settings"></i> Other Settings</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="hm-alerts" data-user-alert="sua-messages" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                    <a href="#"><i class="hm-icon zmdi zmdi-notifications"></i></a>
+                </li>-->
+                <li class="dropdown hm-profile">
+                    <a data-toggle="dropdown" href="#">
+                        <img src="../img/1.jpg" alt="">
+                    </a>
+                    
+                    <ul class="dropdown-menu pull-right dm-icon">
+                        <li>
+                            <a href="profile-about.html"><i class="zmdi zmdi-account"></i> View Profile</a>
+                        </li>
+                       
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-time-restore"></i> Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!--
+            <div class="media-body h-search">
+                <form class="p-relative">
+                    <input type="text" class="hs-input" placeholder="Search for people, files & reports">
+                    <i class="zmdi zmdi-search hs-reset" data-ma-action="search-clear"></i>
+                </form>
+            </div>
+            -->
+        </header>
+
+        <section id="main">
+            
+
+            <aside id="s-main-menu" class="sidebar">
+                <div class="smm-header">
+                    <i class="zmdi zmdi-long-arrow-left" data-ma-action="sidebar-close"></i>
+                </div>
+                
+                <ul class="smm-alerts">
+                   
+                    <li class="active"  data-user-alert="sua-notifications" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                        <i class="zmdi zmdi-notifications"></i>
+                    </li>
+                    
+                    
+                </ul>
+
+                <ul class="main-menu">
+                    <li >
+                        <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
+                    </li>
+                    <li class="active"><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-storage"></i> Inventario</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
+                    <li><a href="invoice.html"><i class="zmdi zmdi-storage"></i> Facturas</a></li>
+                </ul>
+            </aside>
+
+            <section id="content">
+                <div class="container invoice">
+                    <div class="c-header">
+                        <h2>Ticket </h2>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header ch-alt text-center">
+                            <img class="i-logo" src="img/demo/invoice-logo.png" alt="">
+                        </div>
+                        
+                        <div class="card-body card-padding">
+                            <div class="row m-b-25">
+                                <div class="col-xs-6">
+                                    <div class="text-right">
+                                        <p class="c-gray">Emisor</p>
+                                        
+                                        <h4>David Designs LLC</h4>
+                                        
+                                        <span class="text-muted">
+                                            <address>
+                                               Calle Juarez S/N, Cunduacan, Tabasco<br>
+                                                Mexico
+                                            </address>
+                
+                                            0097154686384<br/>
+                                            ejemplo@micorreo.com
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-6">
+                                    <div class="i-to">
+                                        <p class="c-gray">Receptor</p>
+                                        
+                                        <h4>Public en general</h4>
+                                        
+                                        <span class="text-muted">
+                                            <address>
+                                                Calle Juarez S/N, Cunduacan, Tabasco<br>
+                                                Mexico
+                                            </address>
+                
+                                            00971123456789<br/>
+                                            mi@correo.com
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="clearfix"></div>
+                            
+                            <div class="row m-t-25 p-0 m-b-25">
+                                <div class="col-xs-4">
+                                    <div class="bgm-amber brd-2 p-15">
+                                        <div class="c-white m-b-5">Ticket #</div>
+                                        <h2 id="idTicket" class="m-0 c-white f-300">456213</h2>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-4">
+                                    <div class="bgm-blue brd-2 p-15">
+                                        <div class="c-white m-b-5">Fecha</div>
+                                        <h2 id="fechaTicket" class="m-0 c-white f-300">20/06/2015</h2>
+                                    </div>
+                                </div>
+                                
+                                <!-- <div class="col-xs-3">
+                                    <div class="bgm-green brd-2 p-15">
+                                        <div class="c-white m-b-5">Subtotal</div>
+                                        <h2 id="subtotal" class="m-0 c-white f-300">472-000</h2>
+                                    </div>
+                                </div> -->
+                                
+                                <div class="col-xs-4">
+                                    <div class="bgm-red brd-2 p-15">
+                                        <div class="c-white m-b-5">Total</div>
+                                        <h2 id="total" class="m-0 c-white f-300">$23,980</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="clearfix"></div>
+                            
+                            <table class="table i-table m-t-25 m-b-25">
+                                <thead class="text-uppercase">
+                                    <th class="c-gray">Producto</th>
+                                    <th class="c-gray">Precio unitario</th>
+                                    <th class="c-gray">Cantidad</th>
+                                    <th class="highlight">Total</th>
+                                </thead>
+                                
+                                <tbody>
+                                    <thead>
+                                        <tr>
+                                            <td width="50%">
+                                                <h5 class="text-uppercase f-400">Curabitur lobortis</h5>
+                                                <p class="text-muted">Nullam consectetur dolor nec ullamcorper finibus. Quisque a porta mauris, non venenatis mi. Pellentesque habitant morbi tristique</p>
+                                            </td>
+                                            
+                                            <td>$450.00</td>
+                                            <td>05</td>
+                                            <td class="highlight">$2250.00</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td >
+                                                <h5 class="text-uppercase f-400">Phasellus idarcu suscipit nun</h5>
+                                                <p class="text-muted">Pellentesque habitant morbi tristique senectus</p>
+                                            </td>
+                                            <td>$20.00</td>
+                                            <td>02</td>
+                                            <td class="highlight">$40.00</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td>
+                                                <h5 class="text-uppercase f-400">Vivamus</h5>
+                                                <p class="text-muted">Maecenas nec faucibus lectus. Ut cursus elit ante, rutrum pretium augue tincidunt ut. Suspendisse ultrices sapien sit amet</p>
+                                            </td>
+                                            <td>$2322.00</td>
+                                            <td>01</td>
+                                            <td class="highlight">$2322.00</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td>
+                                                <h5 class="text-uppercase f-400">Nullam consectetur dolor</h5>
+                                                <p class="text-muted">Quisque a porta mauris, non venenatis mi. Pellentesque habitant morbi</p>
+                                            </td>
+                                            <td>$1290.00</td>
+                                            <td>12</td>
+                                            <td class="highlight">$15,480.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" style="
+                                            text-align: right;
+                                            color: black;
+                                            font-weight: bold;
+                                        ">Total: </td>
+                                            <td class="highlight">$20,092.00</td>
+                                        </tr>
+                                    </thead> 
+                                </tbody>
+                            </table>
+                            
+                            <div class="clearfix"></div>
+                            
+                            <!-- <div class="p-25">
+                                <h4 class="c-green f-400">REMARKS</h4>
+                                <p class="c-gray">Ornare non tortor. Nam quis ipsum vitae dolor porttitor interdum. Curabitur faucibus erat vel ante fermentum lacinia. Integer porttitor laoreet suscipit. Sed cursus cursus massa ut pellentesque. Phasellus vehicula dictum arcu, eu interdum massa bibendum.</p>
+                                
+                                <br/>
+                                
+                                <h4 class="c-green f-400">MERCY FOR YOUR BUSINESS</h4>
+                                <p class="c-gray">Proin ac iaculis metus. Etiam nisi nulla, fermentum blandit consectetur sed, ornare non tortor. Nam quis ipsum vitae dolor porttitor interdum. Curabitur faucibus erat vel ante fermentum lacinia. Integer porttitor laoreet suscipit. Sed cursus cursus massa ut pellentesque. Phasellus vehicula dictum arcu, eu interdum massa bibendum sit amet.</p>
+                            </div> -->
+                        </div>
+                        
+                        <footer class="m-t-15 p-20">
+                            <ul class="list-inline text-center list-unstyled">
+                                <li class="m-l-5 m-r-5"><small>support@company.com</small></li>
+                                <li class="m-l-5 m-r-5"><small>00971 452 9900</small></li>
+                                <li class="m-l-5 m-r-5"><small>www.company.com</small></li>
+                            </ul>
+                        </footer>
+                    </div>
+                    
+                </div>
+                
+                <button id="btnPrint" class="btn btn-float bgm-red m-btn" ><i class="zmdi zmdi-print"></i></button>
+                <!-- data-action="print" -->
+            </section>
+
+            <footer id="footer">
+                Copyright &copy; 2017 friasoftIt
+
+                <ul class="f-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </footer>
+
+        </section>
+
+        <!-- Page Loader -->
+        <div class="page-loader palette-Teal bg">
+            <div class="preloader pl-xl pls-white">
+                <svg class="pl-circular" viewBox="25 25 50 50">
+                    <circle class="plc-path" cx="50" cy="50" r="20"/>
+                </svg>
+            </div>
+        </div>
+
+        
+        
+
+        <script src="../js/common.js"></script>
+        <script src="../libs/js/bootstrap.min.js"></script>
+       
+        <!--<script src="./vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>-->
+        <script src="../libs/js/waves.min.js"></script>
+        <script src="../libs/js/bootstrap-growl.min.js"></script>        
+
+        <script src="../js/functions.js"></script>
+        <script src="../js/actions.js"></script>
+        <script src="../js/demo.js"></script>
+        <script src="../js/client_side/invoice.js"></script>
+
+        <script id="trRowTicket" type="text/x-friasoft-tmpl">
+            <tr>
+                <td width="50%">
+                    <h5 class="text-uppercase f-400">{NombreProducto}</h5>
+                    <!-- <p class="text-muted">{Descripcion}</p> -->
+                </td>
+                
+                <td>{Precio}</td>
+                <td>{Cantidad}</td>
+                <td class="highlight">${Total}</td>
+            </tr>
+        </script>
+        
+    </body>
+</html>

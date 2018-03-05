@@ -1,13 +1,16 @@
 let fullName = "";
-var remote = require('electron').remote;
 var _arrClients = null;
 var _input = null;
 var _checkedObj = {};
-
+var { ipcRenderer, remote } = require('electron');
+const path = require('path'); 
+const BrowserWindow = remote.BrowserWindow
 
 //document ready
 $(document).ready(function () {
     drawDesktops();
+
+    
 })
 
 function drawDesktops() {
@@ -91,13 +94,7 @@ $(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar").on("cl
     if(_checkedObj.isChecked) {
         $("#startOrStopDesktop").modal();
     } else {
-
-        var message = {
-            start: false,
-            countDown: false,
-            minutes: 0
-        }
-
+        var message = { start: false, countDown: false, minutes: 0 };
         // Detener reloj contador
         var client = getDesktopClient();
     
@@ -106,9 +103,12 @@ $(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar").on("cl
 
         _input.prop("checked", false);
         changeColorDesktopIcon();
+
+        //Guardar informacion de la maquina para su posterior cobro
+        var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        var desktop = Enumerable.from(desktops).where(w => w.nombre === getDesktopNameSelected()).firstOrDefault();
+        saveDesktopToPurchase(desktop);
     }
-    
-    
 });
 
 //Iniciar el reloj en la maquina seleccionada
@@ -124,9 +124,9 @@ $(document).off('click', '#btnClockStart').on('click', '#btnClockStart', functio
 
     if(!cbCountDown.is(':checked')) {
         iCountDown.attr('disabled', true);
-        iCountDown.val('');
     }
 
+    iCountDown.val('');
     $("#startOrStopDesktop").modal('toggle');
 })
 
@@ -144,7 +144,10 @@ $(document).off('click', '#cbCountDown').on('click', '#cbCountDown', function ()
 
 })
 
-//obtener the toggle checkbox input 
+/**
+ * obtener the toggle checkbox input 
+ * @param {*Input o Desktop icon de la maquina seleccionada} element 
+ */
 function getCheckboxDesktop(element) {
     var input = null;
     var isChecked = false;
@@ -160,7 +163,9 @@ function getCheckboxDesktop(element) {
     return { input: input, isChecked: isChecked };
 }
 
-//Canbiar color a la imagen de la computadora
+/**
+ * Canbiar color a la imagen de la computadora
+ */
 function changeColorDesktopIcon() {
     var desktopIcon = _input.parent().parent().parent().find("a > i.fa")
     if(_input.is(":checked"))
@@ -170,7 +175,9 @@ function changeColorDesktopIcon() {
     
 }
 
-//Iniciar o detener el reloj contador para la computadora seleccionada
+/**
+ * Iniciar o detener el reloj contador para la computadora seleccionada
+ */
 function startDesktop() {
     
     var start = false;
@@ -191,7 +198,6 @@ function startDesktop() {
         _input.prop("checked", true);
         start = true;
     }
-        
 
     var message = {
         start: start,
@@ -203,37 +209,45 @@ function startDesktop() {
         client.sock.write(JSON.stringify(message));
 }
 
-//Obtener las maquinas logueadas en el servidor
+/**
+ * Obtener la maquina logueada en el servidor cuando el usuario desea iniciar el contador del tiempo
+ * de la maquina seleccionada
+ */
 function getDesktopClient() {
-    var client = {};
-    
-    _arrClients = remote.getGlobal('clients');
+    return getClient(getDesktopNameSelected());
+}
+
+function getDesktopNameSelected() {
     var idComputadora = parseInt(_input.attr('id').split('-')[1]);
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    var hostname = Enumerable.from(desktops).where(w => w.idComputadora === idComputadora).select(s => s.nombre).firstOrDefault();
+    return hostname;
+}
+
+/**
+ * Devuelve el cliente Socket de una maquina logueada en el servidor
+ * @param {*Nombre de la maquina} hostname 
+ */
+function getClient(hostname) {
+    var client = {};
+    _arrClients = remote.getGlobal('clients');
 
     for (var i = 0; i < _arrClients.length; i++) {
-        if (_arrClients[i].data.idComputadora === idComputadora) {
+        if (_arrClients[i].data.hostname === hostname) {
             client = _arrClients[i];
         }
     }
-
+    // Retorma cliente socket
     return client;
 }
 
 //show add product modal and fill out the fields
 $('#showAddProductModal').click(function () {
-    
-    var $sDesktops = $('#sDesktops');
-    $sDesktops.empty();
-
-    //fill out computadora select element
-    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
-    $sDesktops.append($("<option />").val('0').text('Seleccione una computadora'));
-    $.each(desktops, function() {
-        $sDesktops.append($("<option />").val(this.idComputadora).text(this.nombre));
-    });
+    // populate desktop dropdown
+    fillDesktopDropdown();
 
     //populate dropdown product
-    getProducts(); 
+    //getProducts(); 
 
     //show modal
     $('#addTicketItem').modal('show');
@@ -242,6 +256,31 @@ $('#showAddProductModal').click(function () {
 //Seleccionar computadora, comprobar si existen productos asociados a la computadora seleccionada
 //si existe, mostrarlos en el grid
 $('#sDesktops').change(function () {
-    createGridProduct();
+    var idComputadora = parseInt($(this).val());
+    createGridProduct(idComputadora);
 });
 
+
+/**
+ * Evento del boton cerrar de la modal de agregar productos
+ */
+$('#btnCerrar').click(function () {
+    cleanGridAndProductControls();
+});
+
+/**
+ * Guardar la informacion de la maquina para su posterior cobro
+ * @param {*Objeto de la maquina a cobrar} desktop 
+ */
+function saveDesktopToPurchase(desktop) {
+    if (sessionStorage.getItem('desktopsToPurchase') !== null) {
+        var desktopToPurchase = JSON.parse(sessionStorage.getItem('desktopsToPurchase'));
+        var findDesktop = Enumerable.from(desktopToPurchase).where(w => w.nombre === desktop.nombre).firstOrDefault();
+        if (findDesktop === undefined) {
+            desktopToPurchase.push(desktop);
+            sessionStorage.setItem('desktopsToPurchase', JSON.stringify(desktopToPurchase));
+        }
+    } else {
+        sessionStorage.setItem('desktopsToPurchase', JSON.stringify([desktop]));
+    }
+}

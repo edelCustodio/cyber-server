@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <!--[if IE 9 ]><html class="ie9"><![endif]-->
-    
-<!-- Mirrored from byrushan.com/projects/mae/1-0/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Nov 2017 22:38:12 GMT -->
+
 <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,7 +13,9 @@
         <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
         <link href="../libs/css/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
         <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
-        <link href="../libs/css/bootstrap-datetimepicker.min.css" rel="stylesheet">        
+        <link href="../libs/css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
+        <link href="../libs/css/chosen.min.css" rel="stylesheet">
+      
         
         
         <!-- CSS -->
@@ -155,13 +156,13 @@
                 </ul>
 
                 <ul class="main-menu">
-                    <li class="active">
-                        <a href="../index.html"><i class="zmdi zmdi-home"></i> Principal</a>
+                    <li >
+                        <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
                     </li>
-                    <li><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li class="active"><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
                     <li><a href="widgets.html"><i class="zmdi zmdi-storage"></i> Inventario</a></li>
                     <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
-                    
+                    <li><a href="invoice.html"><i class="zmdi zmdi-storage"></i> Facturas</a></li>
                 </ul>
             </aside>
 
@@ -209,7 +210,11 @@
                                             <div class="form-group">
                                                 <div class="fg-line">
                                                     <div class="select">
-                                                        <select id="sProductos" class="form-control"></select>
+                                                        <select id="sDesktops" class="form-control" style="display: none;"></select>
+                                                        <select id="sProductos" class="chosen" data-placeholder="Seleccione un producto...">
+                                                            <!-- <option></option> -->
+                                                        </select>
+                                                       
                                                     </div>
                                                 </div>
                                             </div>
@@ -238,7 +243,7 @@
                                         <div class="col-sm-2">
                                             <div class="form-group">
                                                 <div class="fg-line">
-                                                    <button id="btnAgregarProducto" class="btn btn-success waves-effect">Agregar</button>
+                                                    <button id="btnAgregarProducto" class="btn btn-success waves-effect" disabled>Agregar</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -246,7 +251,10 @@
                                 </div>
                                 
                             </div>
-                            <div class="card">        
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 id="hDesktopName"></h2>
+                                </div>        
                                 <div class="card-body card-padding">
                                     <div class="row">
                                         <div class="col-sm-12">
@@ -273,7 +281,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-offset-10 col-sm-2">
-                                            <button class="btn btn-primary waves-effect">Pagar</button>
+                                            <button id="btnPagar" class="btn btn-primary waves-effect" disabled>Pagar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -284,6 +292,8 @@
                     
                 </div>
             </section>
+
+            
 
             <footer id="footer">
                 Copyright &copy; 2017 friasoftIt
@@ -326,13 +336,13 @@
         <script src="../libs/js/jquery.flot.resize.js"></script>
         <script src="../libs/js/curvedLines.js"></script>
         <script src="../libs/js/jquery.sparkline.min.js"></script>
+        <script src="../libs/js/chosen.jquery.min.js"></script>
 
 
         <!-- Placeholder for IE9 -->
         <!--[if IE 9 ]>
         <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
         <![endif]-->
-
 
         <script src="../js/functions.js"></script>
         <script src="../js/actions.js"></script>
@@ -360,7 +370,7 @@
         </script>
 
         <script id="itemComputerList" type="text/x-friasoft-tmpl">
-            <a href="#" class="list-group-item media">
+            <a style="cursor: pointer;" class="list-group-item media" id="{idComputadora}">
                 <div class="pull-left">
                     <img class="avatar-img" src="../img/tech.png" alt="">
                 </div>

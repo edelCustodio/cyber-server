@@ -1,5 +1,6 @@
 const net = require('net');
 const ip = require('ip');
+const main = require('../../main');
 
 global.clients = [];
 
@@ -21,7 +22,8 @@ var CyberControl = {
             if (clients.length > 0) {
                 for (var i = 0; i < clients.length; i++) {
                     if (clients[i].sock.remoteAddress === client.sock.remoteAddress) {
-                        console.log('I already have this client on the list. '+ client.sock.remoteAddress);
+                        clients[i] = client;
+                        console.log('I just to update the client list for '+ client.sock.remoteAddress);
                     }else{
                         clients.push(client);
                     }
@@ -40,11 +42,18 @@ var CyberControl = {
                 var textData = data.toString('utf8');
                 var jsonData = JSON.parse(textData);
 
-                for(var i = 0; i < clients.length; i++) {
-                    if(clients[i].sock.remoteAddress === jsonData.IP){
-                        clients[i].data = jsonData;
+                if (jsonData.IP !== undefined) {
+                    for(var i = 0; i < clients.length; i++) {
+                        if(clients[i].sock.remoteAddress === jsonData.IP) {
+                            clients[i].data = jsonData;
+                        }
                     }
-                }                
+                } else if (jsonData.stopBy !== undefined) {
+                    main.getMainWindow().webContents.send('time-off', jsonData.client);
+                } else if (jsonData.idRegistro !== undefined) {
+                    main.getMainWindow().webContents.send('record', textData);
+                }
+
 
                 //Actualizar estado computadora para saber si esta en linea o no.
                 // Desktop.updateDesktopOnline(jsonData.idComputadora, true);

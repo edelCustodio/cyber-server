@@ -1,0 +1,10 @@
+
+
+<script>
+    var { ipcRenderer, remote } = require('electron');
+    
+    ipcRenderer.on('message', (event, arg) => {
+        $('p').html(arg);
+    });
+</script>
+<p>La modal mas chida</p>
