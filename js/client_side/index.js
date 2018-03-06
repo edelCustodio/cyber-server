@@ -8,10 +8,8 @@ const BrowserWindow = remote.BrowserWindow
 
 //document ready
 $(document).ready(function () {
-    drawDesktops();
-
-    
-})
+    drawDesktops();    
+});
 
 function drawDesktops() {
     var allDesktops = "";
@@ -25,15 +23,6 @@ function drawDesktops() {
         })
 
         $("#divComputadoras").append(allDesktops);
-
-        $.get(apiURL + "/api/getDesktopsInUse", function (inUse) {
-
-            $(inUse).each(function (i, pc) {
-                $("#stCompu-" + pc.idComputadora).trigger("click");
-            });
-
-            console.log(inUse);
-        });
         
         if (sessionStorage.getItem('desktops')  === null)
             sessionStorage.setItem('desktops', JSON.stringify(data));
@@ -42,6 +31,7 @@ function drawDesktops() {
             sessionStorage.setItem('desktops', JSON.stringify(data));
         }
 
+        getDesktopsActive();
         console.log(data);
     });
 }

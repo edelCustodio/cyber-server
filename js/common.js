@@ -6,10 +6,6 @@ require('bootstrap-validator')
 require('../libs/js/jquery.mCustomScrollbar')
 var { ipcRenderer, remote } = require('electron');
 
-$(document).ready(function () {
-    getProducts();
-});
-
 /*--------------------------------------
     Notifications & Dialogs
 ---------------------------------------*/
@@ -389,6 +385,27 @@ function cleanGridAndProductControls() {
 
     // close the modal
     $('#addTicketItem').modal('toggle')
+}
+
+function getDesktopsActive() {
+    
+    $.get(apiURL + "/api/getDesktopsInUse", function(data) {
+        console.log('active desktops');
+        console.log(data);
+
+        // $(inUse).each(function (i, pc) {
+            // $("#stCompu-" + pc.idComputadora).trigger("click");
+        // });
+
+        //     var desktopIcon = _input.parent().parent().parent().find("a > i.fa")
+        // if(_input.is(":checked"))
+        //     desktopIcon.attr("style", "color: #4caf50");
+        // else
+        //     desktopIcon.attr("style", "color: #ccc");
+
+        sessionStorage.setItem('destopInUse', JSON.stringify(data));
+        getProducts();
+    });
 }
 
 /**
