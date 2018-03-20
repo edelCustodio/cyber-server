@@ -22,6 +22,11 @@
         <link href="../css/app.min.1.css" rel="stylesheet">
         <link href="../css/app.min.2.css" rel="stylesheet"> 
         <link href="../css/index.css" rel="stylesheet"> 
+        <style>
+            #paymentControls div.input-group.fg-line {
+                display: inline-table;
+            }
+        </style>
         
     </head>
     <body data-ma-header="teal">
@@ -202,6 +207,11 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h2>Agregar producto</h2>
+                                    <div class="toggle-switch actions" data-ts-color="green" style="font-size: 12px; color: #777777;">
+                                        <label for="newTicket" class="ts-label">Crear nuevo ticket</label>
+                                        <input id="newTicket" type="checkbox" hidden="hidden">
+                                        <label for="newTicket" class="ts-helper"></label>
+                                    </div>
                                 </div>
         
                                 <div class="card-body card-padding">
@@ -210,11 +220,9 @@
                                             <div class="form-group">
                                                 <div class="fg-line">
                                                     <div class="select">
-                                                        <select id="sDesktops" class="form-control" style="display: none;"></select>
+                                                        <!-- <select id="sDesktops" class="form-control" style="display: none;"></select> -->
                                                         <select id="sProductos" class="chosen" data-placeholder="Seleccione un producto...">
-                                                            <!-- <option></option> -->
                                                         </select>
-                                                       
                                                     </div>
                                                 </div>
                                             </div>
@@ -273,14 +281,46 @@
                                                         </thead>
                                                         <tbody id="tbListProducts">
                                                             
+                                                            
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-sm-offset-10 col-sm-2">
+                                    <div id="paymentControls" class="row">
+                                        <div class="col-sm-offset-4 col-sm-3">
+                                            <div class="form-group">
+                                                <div class="input-group fg-line"> 
+                                                    <span class="input-group-addon">$</span>
+                                                    <input 
+                                                        type="number"  
+                                                        min="0" 
+                                                        step="0.01" 
+                                                        data-number-to-fixed="2" 
+                                                        data-number-stepfactor="100" 
+                                                        class="form-control currency" 
+                                                        placeholder="pago"
+                                                        id="iPago" />
+                                                </div> 
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="input-group fg-line">
+                                                <span class="input-group-addon">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    step="0.01" 
+                                                    data-number-to-fixed="2" 
+                                                    data-number-stepfactor="100" 
+                                                    class="form-control currency"
+                                                    placeholder="cambio"
+                                                    id="iCambio"
+                                                    disabled />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
                                             <button id="btnPagar" class="btn btn-primary waves-effect" disabled>Pagar</button>
                                         </div>
                                     </div>
@@ -366,6 +406,17 @@
                 <td>$ {precio}</td>
                 <td>{cantidad}</td>
                 <td>$ {total}</td>
+            </tr>
+        </script>
+
+        <script id="trRowGridTicketTotal" type="text/x-friasoft-tmpl">
+            <tr id="gridTotal">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>Total: </strong></td>
+                <td>{Total}</td>
             </tr>
         </script>
 

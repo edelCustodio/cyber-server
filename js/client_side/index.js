@@ -233,14 +233,16 @@ function getClient(hostname) {
 
 //show add product modal and fill out the fields
 $('#showAddProductModal').click(function () {
-    // populate desktop dropdown
-    fillDesktopDropdown();
-
-    //populate dropdown product
-    //getProducts(); 
-
-    //show modal
-    $('#addTicketItem').modal('show');
+    var records = sessionStorage.getItem('desktopRecords') !== null ? JSON.parse(sessionStorage.getItem('desktopRecords')) : [];
+    if(records.length > 0) {
+        // populate desktop dropdown
+        fillDesktopDropdown();
+        //show modal
+        $('#addTicketItem').modal('show');
+    } else {
+        notify('top', 'right', 'fa fa-comments', 'warning', 'Agregar productos, ', 'solo se puede agregar productos a computadoras en uso');
+        // notify('top', 'right', 'fa fa-comments', 'warning', 'Agregar productos, ', 'para agregar algun producto a una computadora activa\n necesita no tener pagos pendientes del ultimo uso de esa computadora.');
+    }
 });
 
 //Seleccionar computadora, comprobar si existen productos asociados a la computadora seleccionada

@@ -1,19 +1,8 @@
 
 
-$('#btnPagar').click(function () {
-    var idComputadora = parseInt($('#sDesktops').val());
-    if (sessionStorage.getItem('tickets') !== null) {
-        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
-
-        var ticket = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).firstOrDefault();
-        if (ticket) {
-
-        }
-    }
-    location.href = 'invoice.html'
-});
 
 $(document).ready(function () {
+    getProducts();
     fillComputerList();
     fillDesktopDropdown();
 });
@@ -76,22 +65,86 @@ function getRecordFromRecordList(idComputadora) {
  * Create the row renta on grid
  */
 $(document).off('click', '#computerList a').on('click', '#computerList a', function() {
-    var idComputadora = parseInt($(this).attr('id'));
-    $("#sDesktops").val(idComputadora);
-    var desktopRecord = getRecordFromRecordList(idComputadora);
-    let renta = {};
-    let products = [];
-    if (sessionStorage.getItem('products') !== null)
-        products = JSON.parse(sessionStorage.getItem('products'));
-
-    // 1360 is the ID for 'Renta de equipo de computo' on product table
-    var idRenta = 1360;
+    _idComputadora = parseInt($(this).attr('id'));
+    if (!_newTicket) {
+        $("#sDesktops").val(_idComputadora);
+        var desktopRecord = getRecordFromRecordList(_idComputadora);
+        let renta = {};
+        let products = [];
+        if (sessionStorage.getItem('products') !== null)
+            products = JSON.parse(sessionStorage.getItem('products'));
     
-    renta = Enumerable.from(products).where(w => w.idProducto === idRenta).firstOrDefault();
-    $('#sProductos').val(idRenta);
-    $('#iCantidad').val(1);
-    $('#iPrecio').val(renta.precio);
-    $('#iTotal').val(desktopRecord.totalPagar);
-    addProductToTicket();
-    // createGridProduct(idComputadora);
+        // 1360 is the ID for 'Renta de equipo de computo' on product table
+        var idRenta = 1360;
+        
+        renta = Enumerable.from(products).where(w => w.idProducto === idRenta).firstOrDefault();
+        $('#sProductos').val(idRenta);
+        $('#iCantidad').val(1);
+        $('#iPrecio').val(renta.precio);
+        $('#iTotal').val(desktopRecord.totalPagar);
+        addProductToTicket();
+    } else {
+        notify('top', 'right', 'fa fa-comments', 'warning', ' Cambiar ticket, ', 'si desea ver el ticket de un PC, desactivar "Crear nuevo ticket" switch.');
+    }
+});
+
+
+/**
+ * evento que se ejecuta al momento de presionar el boton pagar
+ */
+$('#btnPagar').click(function () {
+    
+    if (!_newTicket) {
+        if (sessionStorage.getItem('tickets') !== null) {
+            var tickets = JSON.parse(sessionStorage.getItem('tickets'));
+    
+            var ticket = Enumerable.from(tickets).where(w => w.idComputadora === _idComputadora).firstOrDefault();
+            if (ticket) {
+    
+            }
+        }
+    } else {
+        var saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
+
+        $.post(apiURL + '/api/createTicket', saleTicket, function (data) {
+            if (data.result) {
+                console.log(data);
+                
+                $(saleTicket.ticketsDetalle).each(function (i, d) {
+                    setTimeout(function() {
+                        d.idTicket = data.idTicket;
+                        $.post(apiURL + '/api/createTicketDetalle', d, function(resDetalle) {
+                            console.log(resDetalle);
+                        })
+                    }, 200);
+                })
+            }
+            
+        });
+
+        sessionStorage.removeItem('saleTicket');
+    }
+    
+    // location.href = 'invoice.html'
+});
+
+$('#newTicket').click(function () {
+    _newTicket = !_newTicket;
+    cleanGridAndProductControls();
+    console.log(_newTicket);
+})
+
+$('#iPago').keyup(function () {
+    var pago = parseInt($(this).val());
+    var saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
+    var total = Enumerable.from(saleTicket.ticketsDetalle).sum(s => s.total);
+    var cambio = pago - total;
+
+    saleTicket.total = total;
+    saleTicket.cambio = cambio;
+    saleTicket.pago = pago;
+
+    sessionStorage.setItem('saleTicket', JSON.stringify(saleTicket));
+
+    $('#iCambio').val(cambio);
 });
