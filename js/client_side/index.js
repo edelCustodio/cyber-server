@@ -262,7 +262,7 @@ $('#btnCerrar').click(function () {
 
 /**
  * Guardar la informacion de la maquina para su posterior cobro
- * @param {*Objeto de la maquina a cobrar} desktop 
+ * @param {*Object} desktop objeto de la maquina a cobrar
  */
 function saveDesktopToPurchase(desktop) {
     if (sessionStorage.getItem('desktopsToPurchase') !== null) {

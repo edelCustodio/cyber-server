@@ -305,14 +305,14 @@ function addProductToTicket() {
         _countNewTicket = 0;
         var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
         var nombreComputadora = $('#sDesktops option:selected').val();
-    
+        var tickets = [];
         var ticket = {
             idComputadora: 0,
             nombreComputadora: '',
             productos: []
         };
-        var tickets = [];
         
+        // detalle del ticket
         var ticketD = {
             idProducto: idProducto,
             nombre: nombre,
@@ -324,7 +324,8 @@ function addProductToTicket() {
         if (sessionStorage.getItem('tickets') !== null) {
             tickets = JSON.parse(sessionStorage.getItem('tickets'));
     
-            var productoExistente = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).select(s => Enumerable.from(s.productos).where(w1 => w1.idProducto === idProducto).firstOrDefault()).firstOrDefault();
+            ticket = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).firstOrDefault();
+            var productoExistente = Enumerable.from(ticket.productos).where(w1 => w1.idProducto === idProducto).firstOrDefault();
     
             //if there is an existing product, update its values
             if(productoExistente !== null && !$.isEmptyObject(productoExistente)) {
@@ -332,11 +333,9 @@ function addProductToTicket() {
                 productoExistente.total = ticketD.total;
                 productoExistente.precio = ticketD.precio;
             } else { //add new product
-                //validate if there is an existing desktop on tickets
-                var ticketExist = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).firstOrDefault();
-    
-                if (ticketExist !== null && !$.isEmptyObject(ticketExist)) {
-                    ticketExist.productos.push(ticketD);
+                //validate if there is an existing desktop on tickets    
+                if (ticket !== null && !$.isEmptyObject(ticket)) {
+                    ticket.productos.push(ticketD);
                 } else {
                     ticket.idComputadora = idComputadora;
                     ticket.nombreComputadora = nombreComputadora;
@@ -359,7 +358,7 @@ function addProductToTicket() {
     
         var desktops = JSON.parse(sessionStorage.getItem('desktops'));
     
-        var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === idComputadora).select(s => s.nombre).firstOrDefault();
+        var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === _idComputadora).select(s => s.nombre).firstOrDefault();
         $('#hDesktopName').html(desktopName);
     } else {
         
@@ -393,6 +392,7 @@ function addProductToTicket() {
                 total: 0,
                 pago: 0,
                 cambio: 0,
+                idRegistro: 0,
                 ticketsDetalle: []
             }            
         }
@@ -520,6 +520,40 @@ function getDesktopsActive() {
         }        
         getProducts();
     });
+}
+
+/**
+ * Obtener el ticket por el idComputadora
+ */
+function getTicketByIdComputer() {
+    var ticket = {};
+    if (sessionStorage.getItem('tickets') !== null) {
+        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
+
+        ticket = Enumerable.from(tickets).where(w => w.idComputadora === _idComputadora).firstOrDefault();
+    }
+    return ticket;
+}
+
+/**
+ * Borra el ticket correspondiente a la computadora seleccionada
+ */
+function deleteTicketByIdComputer() {
+    if (sessionStorage.getItem('tickets') !== null) {
+        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
+        tickets = $.grep(tickets, function (t) {
+            return t.idComputadora !== _idComputadora
+        });
+        
+        // borrar item de session storage
+        sessionStorage.removeItem('tickets');
+
+        // crear otro objeto en session storage con la informacion actualizada.
+        sessionStorage.setItem('tickets', JSON.stringify(tickets));
+
+        return true;
+    }
+    return false;
 }
 
 function buildGrid() {

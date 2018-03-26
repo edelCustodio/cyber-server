@@ -23,6 +23,9 @@ var Main = {
     mainWindow = new BrowserWindow({
         width: 1024, 
         height: 900,
+        frame: false,
+        // toolbar: false,
+        // skipTaskbar: true,
         webPreferences: {
           partition: 'persist:name'
         }
@@ -38,7 +41,7 @@ var Main = {
     }))
   
     // Open the DevTools.
-    mainWindow.webContents.openDevTools()
+    // mainWindow.webContents.openDevTools()
   
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
