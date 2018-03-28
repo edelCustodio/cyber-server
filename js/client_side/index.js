@@ -11,30 +11,7 @@ $(document).ready(function () {
     drawDesktops();    
 });
 
-function drawDesktops() {
-    var allDesktops = "";
-    
-    $.get(apiURL + "/api/getComputers", function(data) {
 
-        $(data).each(function(i, pc) {
-            var template = $("#computadora-tmp").html();
-            template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
-            allDesktops += template;
-        })
-
-        $("#divComputadoras").append(allDesktops);
-        
-        if (sessionStorage.getItem('desktops')  === null)
-            sessionStorage.setItem('desktops', JSON.stringify(data));
-        else {
-            sessionStorage.removeItem('desktops');
-            sessionStorage.setItem('desktops', JSON.stringify(data));
-        }
-
-        getDesktopsActive();
-        console.log(data);
-    });
-}
 
 $(window).load(function () {
     

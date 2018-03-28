@@ -52,6 +52,8 @@ var CyberControl = {
                     main.getMainWindow().webContents.send('time-off', jsonData.client);
                 } else if (jsonData.idRegistro !== undefined) {
                     main.getMainWindow().webContents.send('record', textData);
+                } else if (jsonData.closeApp) {
+                    main.getMainWindow().webContents.send('closeApp', jsonData.hostname);
                 }
 
 

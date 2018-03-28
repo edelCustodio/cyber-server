@@ -81,6 +81,30 @@ function alertExecuteFunction(title, text, type, functionHandle) {
     })
 }
 
+
+/**
+ * Mostrar las computadoras activas
+ */
+function drawDesktops() {
+    var allDesktops = "";
+    
+    $.get(apiURL + "/api/getComputers", function(data) {
+
+        $(data).each(function(i, pc) {
+            var template = $("#computadora-tmp").html();
+            template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
+            allDesktops += template;
+        });
+
+        $("#divComputadoras").empty();
+        $("#divComputadoras").append(allDesktops);
+        
+        sessionStorage.setItem('desktops', JSON.stringify(data));
+
+        getDesktopsActive();
+    });
+}
+
 /**
  * Codigo para agregar producto al ticket
  */
@@ -615,4 +639,22 @@ ipcRenderer.on('record', (event, arg) => {
         records.push(record);
         sessionStorage.setItem('desktopRecords', JSON.stringify(records));
     }
+});
+
+/**
+ * cuando la aplicacion cliente se cierra, Se actualizara el status de la computadora
+ * despues necesitamos volver a cargar la lista de las computadoras activas.
+ */
+ipcRenderer.on('closeApp', (event, arg) => {
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    var desktop = Enumerable.from(desktops).where(w => w.nombre === arg).firstOrDefault();
+    var data = { idComputadora: desktop.idComputadora, enLinea: false };
+    $.post(apiURL + 'api/setDesktopOnline', data, function(data) {
+        if(data.result)
+            desktopInfo = data.data;
+        else
+            console.log(data);
+
+        drawDesktops();
+    });
 });
