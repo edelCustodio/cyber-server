@@ -5,6 +5,9 @@
     "body-parser": "1.18.2",
     "bootstrap-validator": "0.11.9",
     "cache": "1.1.2",
+    "electron-is-dev": "0.3.0",
+    "electron-log": "2.2.14",
+    "electron-updater": "2.21.4",
     "express": "4.16.2",
     "font-awesome": "4.7.0",
     "ip": "1.1.5",
@@ -22,16 +25,25 @@
     "electron": "1.7.9"
   },
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "publish": "node_modules/.bin/build --win -p always"
+  },
+  "build": {
+    "appId": "com.friasoftit.skynet-server",
+    "productName": "Skynet Server",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "edelCustodio",
+        "repo": "cyber-server"
+      }
+    ]
   },
   "main": "main.js",
   "version": "0.1.0",
   "license": "MIT",
   "description": "Aplicacion de escritorio para control de un cyber cafe asi como un punto de venta.",
   "author": "Edel Custodio Frias",
-  "devDependencies": {
-    "electron": "~1.7.9"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/edelCustodio/cyber-server.git"

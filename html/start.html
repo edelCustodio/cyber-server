@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skynet client</title>
+    
+    <!-- Vendor CSS -->
+    <link href="../libs/css/animate.min.css" rel="stylesheet">
+    <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
+    <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
+        
+    <!-- CSS -->
+    <link href="../css/app.min.1.css" rel="stylesheet">
+    <link href="../css/app.min.2.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="login" data-lbg="teal">
+        
+        <div class="l-block toggled" id="l-login">
+            <div class="lb-header palette-Teal bg">
+                <i class="zmdi zmdi-storage"></i>
+                Datos del servidor.
+            </div>
+
+            <div class="lb-body">
+                <form id="frIPAddress" data-toggle="validator">
+                    <p class="m-b-30">Por favor, ingresa la IP del servidor al cual se conectará esta aplicación,
+                        y la IP de la maquina que la controlará.
+                    </p>
+
+                    <div class="form-group fg-float">
+                        <div class="fg-line">
+                            <input id="ipServer" type="text" required class="input-sm form-control fg-input"
+                            data-error="Dirección IP no valida."
+                            pattern="^(([1-9]?\d|1\d\d|2[0-5][0-5]|2[0-4]\d)\.){3}([1-9]?\d|1\d\d|2[0-5][0-5]|2[0-4]\d)$">
+                            <label class="fg-label">IP del servidor</label>
+                        </div>
+                        <small class="help-block with-errors"></small>
+                    </div>
+                    <!-- <div class="form-group fg-float">
+                        <div class="fg-line">
+                            <input id="ipMachine" type="text" required class="input-sm form-control fg-input"
+                            data-error="Dirección IP no valida."
+                            pattern="^(([1-9]?\d|1\d\d|2[0-5][0-5]|2[0-4]\d)\.){3}([1-9]?\d|1\d\d|2[0-5][0-5]|2[0-4]\d)$">
+                            <label class="fg-label">IP de la maquina de cobro</label>
+                        </div>
+                        <small class="help-block with-errors"></small>
+                    </div> -->
+                    <div class="form-group">
+                        <button class="btn palette-Teal bg">Guardar configuración</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Javascript Libraries -->
+    <script>
+        window.$ = window.jQuery = require('../libs/js/jquery.min.js');
+        require('../libs/js/bootstrap.min.js')
+        require('../libs/js/bootstrap-growl.min.js')
+        require('bootstrap-validator')
+    </script>
+
+    <script src="../libs/js/waves.min.js"></script>
+    <!-- Placeholder for IE9 -->
+    <!--[if IE 9 ]>
+        <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/functions.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/client_side/start.js"></script>
+    
+</body>
+
+</html>

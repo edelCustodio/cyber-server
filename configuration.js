@@ -1,7 +1,8 @@
 
 'use strict';
 
-var nconf = require('nconf').file({file: getUserHome() + '/cyber-server-config.json'});
+const fileConfig = getUserHome() + '/cyber-server-config.json';
+var nconf = require('nconf').file({file: fileConfig });
 const fs = require('fs');
 const invoiceFolderPath = getUserHome() + '/invoices';
 
@@ -27,10 +28,20 @@ function existInvoiceFolder() {
     return fs.existsSync(invoiceFolderPath);
 }
 
+function existFileConfig() {
+    return fs.existsSync(fileConfig);
+  }
+  
+function getFileConfig() {
+return fileConfig;
+}
+
 module.exports = {
     saveSettings: saveSettings,
     readSettings: readSettings,
     existInvoiceFolder: existInvoiceFolder,
     createInvoiceFolder: createInvoiceFolder,
-    getUserHome: getUserHome
+    getUserHome: getUserHome,
+    existFileConfig: existFileConfig,
+    getFileConfig: getFileConfig
 };

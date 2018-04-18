@@ -39,11 +39,11 @@ $('#frNewAccont').validator().on('submit', function (e) {
         var isValidUser = false;
         var nIcons;
 
-        $.get(apiURL + "/getUserByUsername?user=" + user, function(response) {
+        $.get(apiURL + "/api/getUserByUsername?user=" + user, function(response) {
             if($.isEmptyObject(response)) {
-                $.get(apiURL + "/getUserByEmail?email=" + email, function(res) {
+                $.get(apiURL + "/api/getUserByEmail?email=" + email, function(res) {
                     if($.isEmptyObject(res)) {
-                        $.post(apiURL + "/createEmployee",{name: name, email: email, user: user, pass: pass }, function(data) {
+                        $.post(apiURL + "/api/createEmployee",{name: name, email: email, user: user, pass: pass }, function(data) {
                             if(!$.isEmptyObject(data)) {
                                 
                                 notify(nIcons, "success", "Usuario creado! ", "El usuario fue creado satisfactoriamente.");

@@ -2,6 +2,14 @@ const electron = require('electron');
 var configuration = require('./configuration');
 const { ipcMain } = require('electron')
 const fs = require('fs');
+const os = require('os');
+const { autoUpdater } = require('electron-updater')
+const isDev = require('electron-is-dev')
+const log = require('electron-log');
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
 
 // Module to control application life.
 const app = electron.app
@@ -18,14 +26,20 @@ let mainSession
 
 var Main = {
   createWindow: function() {
+
+    //check for updates
+    autoUpdater.checkForUpdatesAndNotify();
+
+    var fileName = 'html/start.html';
+
+    if (configuration.existFileConfig()) {
+      fileName = 'html/login.html';
+    }
   
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1024, 
         height: 900,
-        frame: false,
-        // toolbar: false,
-        // skipTaskbar: true,
         webPreferences: {
           partition: 'persist:name'
         }
@@ -35,13 +49,15 @@ var Main = {
   
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'html/login.html'),
+      pathname: path.join(__dirname, fileName),
       protocol: 'file:',
       slashes: true
-    }))
+    }));
+
+    mainWindow.setMenu(null);
   
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
   
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
@@ -93,6 +109,32 @@ ipcMain.on('createPDF', (event, arg) => {
 });
 
 
+/**
+ * Update app
+ */
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToWindow('Checking for update...');
+})
+autoUpdater.on('update-available', (info) => {
+  sendStatusToWindow('Update available.');
+})
+autoUpdater.on('update-not-available', (info) => {
+  sendStatusToWindow('Update not available.');
+})
+autoUpdater.on('error', (err) => {
+  sendStatusToWindow('Error in auto-updater. ' + err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+  sendStatusToWindow(log_message);
+})
+autoUpdater.on('update-downloaded', (info) => {
+  sendStatusToWindow('Update downloaded');
+});
+
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -114,6 +156,31 @@ app.on('activate', function () {
     Main.createWindow()
   }
 })
+
+/**
+ * Message communication
+ */
+ipcMain.on('sendIPServer', (event, arg) => {
+  var ips = JSON.parse(arg);
+  
+  var jsonClientConfig = { hostname: os.hostname(), pathConfigFile: configuration.getFileConfig() }
+
+  configuration.saveSettings('hostname', os.hostname());
+  configuration.saveSettings('IPServer', ips.ipServer);
+
+  // mainWindow.setSize(247, 60);
+  event.sender.send('replyIPServer', JSON.stringify(jsonClientConfig));
+});
+
+// Listen for async-reply message from main process
+ipcMain.on('goForIPServer', (event, arg) => {  
+  // Print 2
+  console.log(arg);
+  var ips = { ipServer: configuration.readSettings('IPServer') };
+  // Send sync message to main process
+  event.sender.send('getForIPServer', JSON.stringify(ips));
+});
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

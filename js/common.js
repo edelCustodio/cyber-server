@@ -1,5 +1,5 @@
 const swal = require('sweetalert2')
-let apiURL = "http://localhost:7070";
+let apiURL = '';
 window.$ = window.jQuery = require('../libs/js/jquery.min.js');
 const Enumerable = require('linq');
 require('bootstrap-validator')
@@ -7,6 +7,7 @@ require('../libs/js/jquery.mCustomScrollbar')
 var { ipcRenderer, remote } = require('electron');
 var _newTicket = false;
 var _idComputadora = 0;
+
 
 /*--------------------------------------
     Notifications & Dialogs
@@ -81,6 +82,23 @@ function alertExecuteFunction(title, text, type, functionHandle) {
     })
 }
 
+$(document).ready(function () {
+    if (sessionStorage.getItem('IPServer') !== null) {
+        apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':7070';
+    } else {
+        ipcRenderer.send('goForIPServer', 1);
+    }
+});
+
+/**
+ * Listen for async message from renderer process
+ */
+ipcRenderer.on('getForIPServer', (event, arg) => {  
+    var ips = JSON.parse(arg);
+    sessionStorage.setItem('IPServer', ips.ipServer);
+    apiURL = 'http://' + ips.ipServer + ':7070';
+    sessionStorage.setItem('IPServer', ips.ipServer);
+});
 
 /**
  * Mostrar las computadoras activas
