@@ -1,6 +1,8 @@
 const net = require('net');
 const ip = require('ip');
 const main = require('../../main');
+const desktopNames = [];
+const desktopsArray = [];
 
 global.clients = [];
 
@@ -40,33 +42,64 @@ var CyberControl = {
             sock.on('data', function(data) {
                 
                 var textData = data.toString('utf8');
-                var jsonData = JSON.parse(textData);
+                var jsonData = null;
+                
+                try {
+                    jsonData = JSON.parse(textData);
+                }catch (e) {
+                    const arrStr = textData.split('}');
+                    arrStr.forEach(str => {
+                        if(str.length > 0) {
+                            str = str + '}';
+                            const j = JSON.parse(str);
+                            if (desktopNames.length === 0) {
+                                desktopNames.push(j.hostname);
+                                desktopsArray.push(j);
+                            } else {
+                                const name = desktopNames.filter(w => w === j.hostname)[0];
+                                if(name.length === 0) {
+                                    desktopNames.push(j.hostname);
+                                    desktopsArray.push(j);
+                                }
+                            }
 
-                if (jsonData.IP !== undefined) {
+                            // for(var i = 0; i < clients.length; i++) {
+                            //     if(clients[i].sock.remoteAddress === j.IP) {
+                            //         clients[i].data = j;
+                            //     }
+                            // }
+
+                            if (clients.length > 0) {
+                                clients.forEach(c => {
+                                    if(c.sock.remoteAddress === j.IP) {
+                                        client.data = j;
+                                        c = client;
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+                
+
+                if (jsonData !== null && jsonData.IP !== undefined) {
                     for(var i = 0; i < clients.length; i++) {
                         if(clients[i].sock.remoteAddress === jsonData.IP) {
                             clients[i].data = jsonData;
                         }
                     }
-                } else if (jsonData.stopBy !== undefined) {
+                } else if (jsonData !== null && jsonData.stopBy !== undefined) {
                     main.getMainWindow().webContents.send('time-off', jsonData.client);
-                } else if (jsonData.idRegistro !== undefined) {
+                } else if (jsonData !== null && jsonData.idRegistro !== undefined) {
                     main.getMainWindow().webContents.send('record', textData);
-                } else if (jsonData.closeApp) {
-                    main.getMainWindow().webContents.send('closeApp', jsonData.hostname);
+                } else if (jsonData !== null && jsonData.closeApp) {
+                    main.getMainWindow().webContents.send('clientClosed', jsonData.hostname);
                 }
-
-
-                //Actualizar estado computadora para saber si esta en linea o no.
-                // Desktop.updateDesktopOnline(jsonData.idComputadora, true);
-
             });
           
             // Add a 'close' event handler to this instance of socket
             sock.on('close', function(data) {
                 var textData = data.toString('utf8');
-                console.log(textData);
-                //Desktop.updateDesktopOnline(jsonData.idComputadora, false);
                 console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
             });
         

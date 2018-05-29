@@ -87,13 +87,13 @@ $(document).off('click', '#btnClockStart').on('click', '#btnClockStart', functio
 
     //habilitar o deshabilitar el timepicker countdown
     var cbCountDown = $('#cbCountDown');
-    var iCountDown = $('#iCountDown')
+    var sCountdown = $('#sCountdown');
 
     if(!cbCountDown.is(':checked')) {
-        iCountDown.attr('disabled', true);
+        sCountdown.attr('disabled', true);
     }
 
-    iCountDown.val('');
+    sCountdown.val('0');
     $("#startOrStopDesktop").modal('toggle');
 })
 
@@ -101,14 +101,13 @@ $(document).off('click', '#btnClockStart').on('click', '#btnClockStart', functio
 $(document).off('click', '#cbCountDown').on('click', '#cbCountDown', function () {
     
     var cbCountDown = $('#cbCountDown');
-    var iCountDown = $('#iCountDown')
+    var sCountdown = $('#sCountdown')
 
     if(cbCountDown.is(':checked')) {
-        iCountDown.removeAttr('disabled');
+        sCountdown.removeAttr('disabled');
     } else {
-        iCountDown.attr('disabled', true);
+        sCountdown.attr('disabled', true);
     }
-
 })
 
 /**
@@ -149,7 +148,7 @@ function startDesktop() {
     
     var start = false;
     var cbCountDown = $('#cbCountDown');
-    var iCountDown = $('#iCountDown');
+    var sCountDown = $('#sCountdown');
     var countDown = false;
     var minutes = 0;
     var idComputadora = parseInt(_input.attr('id').split('-')[1]);
@@ -158,7 +157,7 @@ function startDesktop() {
     
     if(cbCountDown.is(':checked')) {
         countDown = true;
-        minutes = parseInt(iCountDown.val());
+        minutes = parseInt(sCountDown.val());
     }
 
     if(_checkedObj.isChecked) {

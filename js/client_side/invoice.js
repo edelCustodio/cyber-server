@@ -1,10 +1,71 @@
 var ipcRenderer = require('electron').ipcRenderer;
+window.$ = window.jQuery = require('../libs/js/jquery.min.js');
+let apiURL = '';
 
-$('#btnPrint').click(function () {
-    const path = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-    var ticketNumber = sessionStorage.getItem('ticketNumber')
-    ipcRenderer.send('createPDF', path + '/invoices/enlace-factura-' + ticketNumber + '.pdf');
+
+$(document).ready(function () {
+    if (sessionStorage.getItem('IPServer') !== null) {
+        apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':7070';
+    }
+
+    getTicketInfo();
 });
+
+/**
+ * Obtener el detalle del ticket para imprimir
+ */
+function getTicketInfo() {
+    if(sessionStorage.getItem('idTicket') !== null) {
+        const idTicket = +sessionStorage.getItem('idTicket');
+
+        $.post(apiURL + '/api/getTicket', { idTicket: idTicket }, function(data) {
+            if(data.result) {
+                console.log(data.data);
+                const detalleTicket = data.data;
+                var listProductos = $('#listProductos');
+                listProductos.empty();
+                let total = 0;
+                $(detalleTicket).each(function (i, detalle) {
+                    var producto = $('#producto').html();
+                    producto = producto.replace('{cantidad}', detalle.cantidad);
+                    producto = producto.replace('{nombre}', detalle.nombre);
+                    producto = producto.replace('{precio}', detalle.precio);
+
+                    total += detalle.precio;
+
+                    listProductos.append(producto);
+                });
+
+                // total del ticket
+                var t = $('#total').html();
+                t = t.replace('{total}', total);
+                listProductos.append(t);
+
+                // titulo
+                var titulo = $('#titulo').html();
+                var fechaHora = $('#fechaHoraNoTicket').html();
+                var hoy = new Date();
+
+                fechaHora = fechaHora.replace('{noTicket}', idTicket);
+                fechaHora = fechaHora.replace('{fecha}', hoy.toLocaleDateString() + ' ' + hoy.toLocaleTimeString());
+                titulo = titulo.replace('{subtitulo}', fechaHora);
+                $('#titulo').html(titulo);
+
+                // imprimir ticket
+                printTicket();
+            }
+        });
+    }
+}
+
+/**
+ * Imprimir ticket cuando este se muestre en pantalla
+ */
+function printTicket() {
+    const path = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    var idTicket = sessionStorage.getItem('idTicket')
+    ipcRenderer.send('createPDF', path + '/invoices/enlace-factura-' + idTicket + '.pdf');
+}
 
 /**
  * Once a pdf was created, it returns to validate if was created correctly
@@ -18,8 +79,3 @@ ipcRenderer.on('PDFCreated', (event, arg) => {
         console.log(pdfCreated.message);
     }
 });
-
-
-$(document).ready(function () {
-    
-})

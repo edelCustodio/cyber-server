@@ -13,11 +13,11 @@ $(document).ready(function () {
  */
 function fillComputerList() {
     var computerList = $('#computerList');
-
+    computerList.empty();
     $.each(getDesktopListToPay(), function (i, e) {
         var itemComputerListTemplate = $('#itemComputerList').html();
-        itemComputerListTemplate = itemComputerListTemplate.replace('{idComputadora}', e.idComputadora);
-        itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', e.nombre);
+        itemComputerListTemplate = itemComputerListTemplate.replace('{idComputadora}', e.idComputadora + '-' + e.idRegistro);
+        itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', getDesktopName(e.idComputadora));
         var ticket = getTicketByIdComputer();
         if(ticket) {
             if (ticket.productos.length > 0)
@@ -25,17 +25,21 @@ function fillComputerList() {
         } else 
             itemComputerListTemplate = itemComputerListTemplate.replace('{products}', '');
 
+        const startTime = new Date(e.fechaInicio);
+        itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.toLocaleTimeString());
+
         computerList.append(itemComputerListTemplate);
     });
 }
 
 /**
  * Obtiene la lista de las maquinas pendientes por cobrar
+ * los datos los obtemos por registro generado por el uso de la maquina
  */
 function getDesktopListToPay() {
     var desktopList = [];
-    if (sessionStorage.getItem('desktopsToPurchase') !== null)
-        desktopList = JSON.parse(sessionStorage.getItem('desktopsToPurchase'));
+    if (sessionStorage.getItem('desktopRecords') !== null)
+        desktopList = JSON.parse(sessionStorage.getItem('desktopRecords'));
 
     return desktopList;
 }
@@ -48,7 +52,7 @@ function getRecordFromRecordList() {
     if(sessionStorage.getItem('desktopRecords') !== null)
         records = JSON.parse(sessionStorage.getItem('desktopRecords'));
 
-    return Enumerable.from(records).where(w => w.idComputadora === _idComputadora).firstOrDefault();
+    return Enumerable.from(records).where(w => w.idComputadora === _idComputadora && w.idRegistro === _idRegistro).firstOrDefault();
 }
 
 /**
@@ -57,7 +61,7 @@ function getRecordFromRecordList() {
 function deleteDesktopRecord() {
     var records = JSON.parse(sessionStorage.getItem('desktopRecords'));
     records = $.grep(records, function (r) {
-        return r.idComputadora !== _idComputadora;
+        return r.idRegistro !== _idRegistro;
     });
 
     // borrar item de session storage
@@ -91,10 +95,20 @@ function deleteDesktopPurchased() {
  * Create the row renta on grid
  */
 $(document).off('click', '#computerList a').on('click', '#computerList a', function() {
-    _idComputadora = parseInt($(this).attr('id'));
+    const anchor = $(this);
+    _idComputadora = parseInt(anchor.attr('id').split('-')[0]);
+    _idRegistro = parseInt(anchor.attr('id').split('-')[1]);
+
+    // seleccionar el elemento de la computadora en la lista
+    $('#computerList').children().each(function (i, a) {
+        $(a).css('background-color', '');
+    });
+
+    $(this).css('background-color', '#f4f4f4');
+
     if (!_newTicket) {
         $("#sDesktops").val(_idComputadora);
-        var desktopRecord = getRecordFromRecordList();
+        var record = getRecordFromRecordList();
         let renta = {};
         let products = [];
         if (sessionStorage.getItem('products') !== null)
@@ -107,7 +121,7 @@ $(document).off('click', '#computerList a').on('click', '#computerList a', funct
         $('#sProductos').val(idRenta);
         $('#iCantidad').val(1);
         $('#iPrecio').val(renta.precio);
-        $('#iTotal').val(desktopRecord.totalPagar);
+        $('#iTotal').val(record.totalPagar);
         addProductToTicket();
     } else {
         notify('top', 'right', 'fa fa-comments', 'warning', ' Cambiar ticket, ', 'si desea ver el ticket de un PC, desactivar "Crear nuevo ticket" switch.');
@@ -122,36 +136,37 @@ $('#btnPagar').click(function () {
     
     if (!_newTicket) {
         var record = getRecordFromRecordList();
-        var ticket = getTicketByIdComputer();
-        var total = Enumerable.from(ticket.productos).sum(s => s.total);
+        var total = 0;
         var detalles = [];
-        ticket.productos.forEach(p => {
-            const detalle = {
-                idTicketDetalle: 0,
-                idTicket: 0,
-                idProducto: p.idProducto,
-                cantidad: p.cantidad
-            }
+        var saleTicket = {};
 
-            detalles.push(detalle);
-        });
+        var ticket = getTicketByIdComputer();
+        if(ticket) {
+            total = Enumerable.from(ticket.productos).sum(s => s.total);
+            ticket.productos.forEach(p => {
+                const detalle = {
+                    idTicketDetalle: 0,
+                    idTicket: 0,
+                    idProducto: p.idProducto,
+                    cantidad: p.cantidad
+                }
 
-        var saleTicket = {
+                detalles.push(detalle);
+            });
+        }
+
+        saleTicket = {
             total: total,
             pago: parseFloat($('#iPago').val()),
             cambio: parseFloat($('#iCambio').val()),
             idRegistro: record.idRegistro,
             ticketsDetalle: detalles
-        } 
-
-        guardarTicketVenta(saleTicket);
-
-
+        };
     } else {
-        var saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
-
-        guardarTicketVenta(saleTicket);
+        saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
     }
+
+    guardarTicketVenta(saleTicket);
     
     // location.href = 'invoice.html'
 });
@@ -164,6 +179,7 @@ function guardarTicketVenta(saleTicket) {
     $.post(apiURL + '/api/createTicket', saleTicket, function (data) {
         if (data.result) {
             let listInserts = buildTicketDetailInsert(data.idTicket, saleTicket.ticketsDetalle);
+            sessionStorage.setItem('idTicket', data.idTicket);
 
             //call method to insert data
             $.post(apiURL + '/api/createTicketDetalle', { strInsert: listInserts }, function(data) {
@@ -180,7 +196,9 @@ function guardarTicketVenta(saleTicket) {
                         deleteDesktopRecord();
 
                         // eliminar computadora procesada
-                        deleteDesktopPurchased();
+                        // deleteDesktopPurchased();
+                    } else {
+                        sessionStorage.removeItem('saleTicket');
                     }
 
                     // limpiar el grid
@@ -189,8 +207,7 @@ function guardarTicketVenta(saleTicket) {
                     // mensaje
                     notify('top', 'right', 'fa fa-comments', 'success', ' Ticket guardado, ', 'el ticket fue generado satisfactoriamente.');
 
-                    // remove data
-                    sessionStorage.removeItem('saleTicket');
+                    document.location.href = 'invoice.html';
                 }
             })
         }
@@ -240,7 +257,11 @@ $('#iPago').keyup(function () {
         sessionStorage.setItem('saleTicket', JSON.stringify(saleTicket));
     }
 
-    
+    if (pago > 0) {
+        $('#btnPagar').removeAttr('disabled');
+    } else {
+        $('#btnPagar').attr('disabled', true);
+    }
 
     $('#iCambio').val(cambio);
 });

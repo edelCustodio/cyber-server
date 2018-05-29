@@ -117,11 +117,11 @@
                     
                     <ul class="dropdown-menu pull-right dm-icon">
                         <li>
-                            <a href="profile-about.html"><i class="zmdi zmdi-account"></i> View Profile</a>
+                            <a id="update" style="cursor: pointer;"><i class="zmdi zmdi-refresh zmdi-hc-fw"></i> Actualizar</a>
                         </li>
                        
                         <li>
-                            <a href="#"><i class="zmdi zmdi-time-restore"></i> Logout</a>
+                            <a id="logout" style="cursor: pointer;"><i class="zmdi zmdi-block zmdi-hc-fw"></i> Cerrar sesion</a>
                         </li>
                     </ul>
                 </li>
@@ -409,7 +409,30 @@
                             <div class="input-group form-group">
                                 <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span>
                                 <div class="dtp-container fg-line disabled">
-                                    <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar">
+                                    <select name="" id="sCountdown">
+                                        <option value="0">Seleccione el tiempo de uso</option>
+                                        <option value="30">30 min</option>
+                                        <option value="60">1 hr</option>
+                                        <option value="90">1 hr 30 min</option>
+                                        <option value="120">2 hrs</option>
+                                        <option value="150">2 hrs 30 min</option>
+                                        <option value="180">3 hrs</option>
+                                        <option value="210">3 hrs 30 min</option>
+                                        <option value="240">4 hrs</option>
+                                        <option value="270">4 hrs 30 min</option>
+                                        <option value="300">5 hrs</option>
+                                        <option value="330">5 hrs 30 min</option>
+                                        <option value="360">6 hrs</option>
+                                        <option value="390">6 hrs 30 min</option>
+                                        <option value="420">7 hrs</option>
+                                        <option value="450">7 hrs 30 min</option>
+                                        <option value="480">8 hrs</option>
+                                        <option value="510">8 hrs 30 min</option>
+                                        <option value="540">9 hrs</option>
+                                        <option value="570">9 hrs 30 min</option>
+                                        <option value="600">10 hrs</option>
+                                    </select>
+                                    <!-- <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar"> -->
                                 </div>
                             </div>
                             

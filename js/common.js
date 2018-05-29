@@ -7,6 +7,7 @@ require('../libs/js/jquery.mCustomScrollbar')
 var { ipcRenderer, remote } = require('electron');
 var _newTicket = false;
 var _idComputadora = 0;
+var _idRegistro = 0;
 
 
 /*--------------------------------------
@@ -133,6 +134,10 @@ function drawDesktops() {
 $('#sProductos').change(function () {
     var sProductos = $(this);
 
+    if (sProductos.val() === '0') {
+        return;
+    }
+
     if(!_newTicket) {
         var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
         $("#iCantidad").val('');
@@ -255,12 +260,11 @@ function fillDesktopDropdown() {
         $sDesktops.append($("<option />").val(0).text('Seleccione una computadora'));
         $.each(desktops, function() {
             var desktopRecord = Enumerable.from(records).where(w => w.idComputadora === this.idComputadora).firstOrDefault();
-            if(desktopRecord.fechaFin === null) {
+            if (desktopRecord.fechaFin === null) {
                 $sDesktops.append($("<option />").val(this.idComputadora).text(this.nombre));
             }
         });
     }
-    
 }
 
 
@@ -342,14 +346,15 @@ function addProductToTicket() {
     var cantidad = parseInt($('#iCantidad').val());
     var precio = parseFloat($('#iPrecio').val());
     var total = parseFloat($('#iTotal').val());
+    var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
 
     if (!_newTicket) {
         _countNewTicket = 0;
-        var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
         var nombreComputadora = $('#sDesktops option:selected').val();
         var tickets = [];
         var ticket = {
-            idComputadora: 0,
+            idComputadora: _idComputadora,
+            idRegistro: _idRegistro,
             nombreComputadora: '',
             productos: []
         };
@@ -365,25 +370,37 @@ function addProductToTicket() {
     
         if (sessionStorage.getItem('tickets') !== null) {
             tickets = JSON.parse(sessionStorage.getItem('tickets'));
+        }
+
+        if (tickets.length > 0) {
     
-            ticket = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).firstOrDefault();
-            var productoExistente = Enumerable.from(ticket.productos).where(w1 => w1.idProducto === idProducto).firstOrDefault();
-    
+            const ticketExists = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora && w.idRegistro === _idRegistro).firstOrDefault();
+            
             //if there is an existing product, update its values
-            if(productoExistente !== null && !$.isEmptyObject(productoExistente)) {
-                productoExistente.cantidad = ticketD.cantidad;
-                productoExistente.total = ticketD.total;
-                productoExistente.precio = ticketD.precio;
+            if(ticketExists !== null) {
+                var productoExistente = Enumerable.from(ticketExists.productos).where(w1 => w1.idProducto === idProducto).firstOrDefault();
+
+                if(productoExistente !== null) {
+                    productoExistente.cantidad = ticketD.cantidad;
+                    productoExistente.total = ticketD.total;
+                    productoExistente.precio = ticketD.precio;
+                } else {
+                    // quitar objeto existente
+                    tickets = $.grep(tickets, function (t) {
+                        return t.idRegistro !== _idRegistro
+                    });
+
+                    // agregar objeto con nuevos elementos
+                    ticketExists.productos.push(ticketD);
+                    tickets.push(ticketExists);
+                }
+                
             } else { //add new product
                 //validate if there is an existing desktop on tickets    
-                if (ticket !== null && !$.isEmptyObject(ticket)) {
-                    ticket.productos.push(ticketD);
-                } else {
-                    ticket.idComputadora = idComputadora;
-                    ticket.nombreComputadora = nombreComputadora;
-                    ticket.productos.push(ticketD);
-                    tickets.push(ticket);
-                }
+                ticket.idComputadora = idComputadora;
+                ticket.nombreComputadora = nombreComputadora;
+                ticket.productos.push(ticketD);
+                tickets.push(ticket);
             }
         } else {
             ticket.idComputadora = idComputadora;
@@ -395,13 +412,13 @@ function addProductToTicket() {
         sessionStorage.removeItem('tickets');
         sessionStorage.setItem('tickets', JSON.stringify(tickets));
     
-        //recreate grid ticket product
-        createGridProduct(idComputadora);
-    
         var desktops = JSON.parse(sessionStorage.getItem('desktops'));
     
         var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === _idComputadora).select(s => s.nombre).firstOrDefault();
         $('#hDesktopName').html(desktopName);
+
+        //recreate grid ticket product
+        createGridProduct(idComputadora);
     } else {
         
         var saleTicket = {};
@@ -460,9 +477,6 @@ function addProductToTicket() {
 
         sessionStorage.setItem('saleTicket', JSON.stringify(saleTicket));
     }
-    
-    // deshabilitar el boton de pagar
-    $('#btnPagar').removeAttr('disabled');
 
     // clean controls
     $('#iCantidad').val('');
@@ -496,7 +510,7 @@ function createGridProduct(idComputadora) {
     $('#tbListProducts').empty();
     // var idComputadora = parseInt($('#sDesktops').val());
     var tickets = JSON.parse(sessionStorage.getItem('tickets'));
-    var productos = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora).select(s => s.productos).firstOrDefault();
+    var productos = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora && w.idRegistro === _idRegistro).select(s => s.productos).firstOrDefault();
     var total = 0;
 
     if (productos !== null && productos.length > 0) {
@@ -531,6 +545,8 @@ function cleanGridAndProductControls() {
     $('#iCantidad').val('');
     $('#iPrecio').val('');
     $('#iTotal').val('');
+    $('#iPago').val('');
+    $('#iCambio').val('');
 
     // dropdown product
     // dropdown product
@@ -572,9 +588,11 @@ function getTicketByIdComputer() {
     if (sessionStorage.getItem('tickets') !== null) {
         var tickets = JSON.parse(sessionStorage.getItem('tickets'));
 
-        ticket = Enumerable.from(tickets).where(w => w.idComputadora === _idComputadora).firstOrDefault();
+        ticket = Enumerable.from(tickets).where(w => w.idComputadora === _idComputadora && w.idRegistro === _idRegistro).firstOrDefault();
+        
+        return ticket;
     }
-    return ticket;
+    return undefined;
 }
 
 /**
@@ -584,7 +602,7 @@ function deleteTicketByIdComputer() {
     if (sessionStorage.getItem('tickets') !== null) {
         var tickets = JSON.parse(sessionStorage.getItem('tickets'));
         tickets = $.grep(tickets, function (t) {
-            return t.idComputadora !== _idComputadora
+            return t.idRegistro !== _idRegistro
         });
         
         // borrar item de session storage
@@ -598,9 +616,40 @@ function deleteTicketByIdComputer() {
     return false;
 }
 
-function buildGrid() {
-
+/**
+ * Obtener el nombre de una computadora por id
+ * @param {*} idComputadora id de la computadora
+ */
+function getDesktopName(idComputadora) {
+    if (sessionStorage.getItem('desktops') !== null) {
+        const desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        const desktop = Enumerable.from(desktops).where(w => w.idComputadora === idComputadora).firstOrDefault();
+        return desktop.nombre;
+    }
+    return '';
 }
+
+/**
+ * Actualizar ventana
+ */
+$('#update').click(function () {
+    window.location.reload();
+});
+
+/**
+ * Cerrar sesion
+ */
+$('#logout').click(function () {
+    const userInfo = JSON.parse(sessionStorage.getItem('userLoggedIn'));
+    $.post(apiURL + '/api/logout', { idSesion: userInfo.idSesion }, function(data) {
+        if(data.result) {
+            const ipServer = sessionStorage.getItem('IPServer');
+            sessionStorage.clear();
+            sessionStorage.setItem('IPServer', ipServer);
+            document.location.href = "login.html";
+        }
+    })
+});
 
 /**
  * *********************************************************************
@@ -659,20 +708,3 @@ ipcRenderer.on('record', (event, arg) => {
     }
 });
 
-/**
- * cuando la aplicacion cliente se cierra, Se actualizara el status de la computadora
- * despues necesitamos volver a cargar la lista de las computadoras activas.
- */
-ipcRenderer.on('closeApp', (event, arg) => {
-    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
-    var desktop = Enumerable.from(desktops).where(w => w.nombre === arg).firstOrDefault();
-    var data = { idComputadora: desktop.idComputadora, enLinea: false };
-    $.post(apiURL + 'api/setDesktopOnline', data, function(data) {
-        if(data.result)
-            desktopInfo = data.data;
-        else
-            console.log(data);
-
-        drawDesktops();
-    });
-});
