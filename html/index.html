@@ -215,12 +215,9 @@
                 </div>
                 
                 <ul class="smm-alerts">
-                   
-                    <li class="active"  data-user-alert="sua-notifications" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                    <li class="active" style="visibility: hidden;" data-user-alert="sua-notifications" data-ma-action="sidebar-open" data-ma-target="user-alerts">
                         <i class="zmdi zmdi-notifications"></i>
                     </li>
-                    
-                    
                 </ul>
 
                 <ul class="main-menu">
@@ -228,6 +225,14 @@
                         <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
                     </li>
                     <li><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <!-- <li class="sub-menu">
+                        <a data-ma-action="submenu-toggle"><i class="zmdi zmdi-collection-plus zmdi-hc-fw"></i> Catalogos</a>
+                        <ul>
+                            <li><a href="usuario.html"><i class="zmdi zmdi-account-add zmdi-hc-fw"></i> Usuario</a></li>
+                            <li><a href="producto.html"><i class="zmdi zmdi-truck zmdi-hc-fw"></i> Producto</a></li>
+                            <li><a href="computadora.html"><i class="zmdi zmdi-desktop-mac zmdi-hc-fw"></i> Computadora</a></li>
+                        </ul>
+                    </li> -->
                     <!-- <li><a href="widgets.html"><i class="zmdi zmdi-storage" ></i> Inventario</a></li>
                     <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
                     <li><a href="invoice.html"><i class="zmdi zmdi-storage"></i> Facturas</a></li> -->
@@ -407,9 +412,9 @@
                                 </div>
                             </div>
                             <div class="input-group form-group">
-                                <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span>
-                                <div class="dtp-container fg-line disabled">
-                                    <select name="" id="sCountdown">
+                                <!-- <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span> -->
+                                
+                                    <select name="" id="sCountdown" disabled>
                                         <option value="0">Seleccione el tiempo de uso</option>
                                         <option value="30">30 min</option>
                                         <option value="60">1 hr</option>
@@ -433,14 +438,14 @@
                                         <option value="600">10 hrs</option>
                                     </select>
                                     <!-- <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar"> -->
-                                </div>
+                                
                             </div>
                             
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button id="btnClockStart" type="button" class="btn btn-link waves-effect">Iniciar</button>
                         <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
+                        <button id="btnClockStart" type="button" class="btn btn-primary waves-effect">Iniciar</button>
                     </div>
                 </div>
             </div>
@@ -517,6 +522,17 @@
                 <td>$ {precio}</td>
                 <td>{cantidad}</td>
                 <td>$ {total}</td>
+            </tr>
+        </script>
+        <script id="trRowGridTicketTotal" type="text/x-friasoft-tmpl">
+            <tr>
+                <td class="text-left">
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>$ {Total}</td>
             </tr>
         </script>
     </body>

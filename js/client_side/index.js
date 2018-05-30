@@ -1,5 +1,5 @@
 let fullName = "";
-var _arrClients = null;
+
 var _input = null;
 var _checkedObj = {};
 var { ipcRenderer, remote } = require('electron');
@@ -8,6 +8,7 @@ const BrowserWindow = remote.BrowserWindow
 
 //document ready
 $(document).ready(function () {
+    _arrClients = remote.getGlobal('clients');
     drawDesktops();    
 });
 
@@ -60,6 +61,9 @@ $(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar").on("cl
 
     if(_checkedObj.isChecked) {
         $("#startOrStopDesktop").modal();
+        $('#cbCountDown').attr('checked', false);
+        $('#sCountdown').attr('disabled', true);
+        
     } else {
         var message = { start: false, countDown: false, minutes: 0 };
         // Detener reloj contador
@@ -97,22 +101,47 @@ $(document).off('click', '#btnClockStart').on('click', '#btnClockStart', functio
     $("#startOrStopDesktop").modal('toggle');
 })
 
-// ckeckbox para habilitar o deshabilitar el timepicker count down input
+/**
+ * ckeckbox para habilitar o deshabilitar el timepicker count down input
+ */
 $(document).off('click', '#cbCountDown').on('click', '#cbCountDown', function () {
     
     var cbCountDown = $('#cbCountDown');
-    var sCountdown = $('#sCountdown')
+    var sCountdown = $('#sCountdown');
+    var btnClockStart = $('#btnClockStart');
 
     if(cbCountDown.is(':checked')) {
         sCountdown.removeAttr('disabled');
+        
+        btnClockStart.attr('disabled', true);
     } else {
         sCountdown.attr('disabled', true);
+        btnClockStart.attr('disabled', false);
+    }
+
+    // valor por default del dropdown de tiempo 
+    sCountdown.val('0');
+});
+
+/**
+ * Si se selecciona tiempo fijo para el uso de la maquina, se tiene
+ * que seleccionar el dropdown para elegir el tiempo deseado, el boton de iniciar
+ * solo se habilitara cuando se halla seleccionado una opcion de tiempo valido
+ */
+$(document).off('change', '#sCountdown').on('change', '#sCountdown', function () {
+    var select = $(this);
+
+    var btnClockStart = $('#btnClockStart');
+    if(select.val() !== '0') {
+        btnClockStart.attr('disabled', false);
+    } else {
+        btnClockStart.attr('disabled', true);
     }
 })
 
 /**
  * obtener the toggle checkbox input 
- * @param {*Input o Desktop icon de la maquina seleccionada} element 
+ * @param {*} element Input o Desktop icon de la maquina seleccionada
  */
 function getCheckboxDesktop(element) {
     var input = null;
@@ -192,18 +221,17 @@ function getDesktopNameSelected() {
 
 /**
  * Devuelve el cliente Socket de una maquina logueada en el servidor
- * @param {*Nombre de la maquina} hostname 
+ * @param {*} hostname Nombre de la maquina 
  */
 function getClient(hostname) {
     var client = {};
-    _arrClients = remote.getGlobal('clients');
-
+    // buscar maquina
     for (var i = 0; i < _arrClients.length; i++) {
         if (_arrClients[i].data.hostname === hostname) {
             client = _arrClients[i];
         }
     }
-    // Retorma cliente socket
+    // regresa socket de la maquina se esta buscando
     return client;
 }
 

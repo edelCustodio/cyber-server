@@ -8,6 +8,7 @@ var { ipcRenderer, remote } = require('electron');
 var _newTicket = false;
 var _idComputadora = 0;
 var _idRegistro = 0;
+var _arrClients = [];
 
 
 /*--------------------------------------
@@ -108,11 +109,17 @@ function drawDesktops() {
     var allDesktops = "";
     
     $.get(apiURL + "/api/getComputers", function(data) {
-
+        // recorrer las maquinas que estan en linea en base de datos
         $(data).each(function(i, pc) {
-            var template = $("#computadora-tmp").html();
-            template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
-            allDesktops += template;
+            // comparar contra las maquinas que realmente tienen comunicacion
+            // con la maquina de cobro
+            _arrClients.forEach(cl => {
+                if (cl.data.hostname === pc.nombre) {
+                    var template = $("#computadora-tmp").html();
+                    template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
+                    allDesktops += template;
+                }
+            });
         });
 
         $("#divComputadoras").empty();
@@ -120,6 +127,7 @@ function drawDesktops() {
         
         sessionStorage.setItem('desktops', JSON.stringify(data));
 
+        // obtener maquinas en uso en tiempo real
         getDesktopsActive();
     });
 }
@@ -258,11 +266,9 @@ function fillDesktopDropdown() {
 
     if (records.length > 0) {
         $sDesktops.append($("<option />").val(0).text('Seleccione una computadora'));
-        $.each(desktops, function() {
-            var desktopRecord = Enumerable.from(records).where(w => w.idComputadora === this.idComputadora).firstOrDefault();
-            if (desktopRecord.fechaFin === null) {
-                $sDesktops.append($("<option />").val(this.idComputadora).text(this.nombre));
-            }
+        $.each(records.filter(w => w.fechaFin === null), function(i, r) {
+            var desktop = Enumerable.from(desktops).where(w => w.idComputadora === r.idComputadora).firstOrDefault();
+            $sDesktops.append($("<option />").val(desktop.idComputadora).text(desktop.nombre));
         });
     }
 }
@@ -347,6 +353,17 @@ function addProductToTicket() {
     var precio = parseFloat($('#iPrecio').val());
     var total = parseFloat($('#iTotal').val());
     var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
+    let records = [];
+
+    if (sessionStorage.getItem('desktopRecords') !== null) {
+        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
+    }
+
+    if (_idRegistro === 0) {
+        if (records.length > 0) {
+            _idRegistro = Enumerable.from(records).where(w => w.idComputadora === idComputadora && w.fechaFin === null).select(s => s.idRegistro).firstOrDefault();
+        }
+    }
 
     if (!_newTicket) {
         _countNewTicket = 0;
@@ -415,7 +432,8 @@ function addProductToTicket() {
         var desktops = JSON.parse(sessionStorage.getItem('desktops'));
     
         var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === _idComputadora).select(s => s.nombre).firstOrDefault();
-        $('#hDesktopName').html(desktopName);
+        var recordTime = new Date(Enumerable.from(records).where(w => w.idRegistro === _idRegistro).select(s => s.fechaInicio).firstOrDefault());
+        $('#hDesktopName').html(desktopName + ' - ' + recordTime.toLocaleTimeString());
 
         //recreate grid ticket product
         createGridProduct(idComputadora);
@@ -681,6 +699,47 @@ ipcRenderer.on('time-off', (event, arg) => {
 });
 
 /**
+ * Cuando alguna maquina cliente pierde conexion
+ * necesitamos actualizar su estado en la base de datos
+ * y quitarlo del array de sockets que tenemos en la 
+ * maquina de cobro
+ */
+ipcRenderer.on('clientClosed', (event, arg) => {
+    // ip de maquina desconectada
+    const ipClient = arg;
+    // arreglo de maquinas
+    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    
+    // recorrer arreglo de sockets
+    _arrClients.forEach(cli => {
+        // si la IP coincide, proceder con la actualizacion en BD
+        if (ipClient.includes(cli.data.IP)) {
+            // obtener objeto de la maquina a desconectar
+            var desktop = Enumerable.from(desktops).where(w => w.nombre === cli.data.hostname).firstOrDefault();
+
+            if(desktop !== null) {
+                // valores para sacar de linea la maquina desconectada
+                var data = { idComputadora: desktop.idComputadora, enLinea: false };
+                $.post(apiURL + '/api/setDesktopOnline', data, function(response) {
+                    if (response.result) {
+                        // eliminar del arreglo de sockets la maquina desconectada
+                        _arrClients = $.grep(_arrClients, function(r) {
+                            return !ipClient.includes(r.data.IP);
+                        });
+
+                        // si la aplicacion esta en el index, este se actualizara
+                        // automaticamente
+                        if (document.location.href.includes('index.html')) {
+                            document.location.reload();
+                        }
+                    }
+                });
+            }
+        }
+    });
+});
+
+/**
  * Obtener los registros del tiempo de uso de cada computadora y almacenarlo en el sessionStorage
  */
 ipcRenderer.on('record', (event, arg) => {
@@ -691,7 +750,7 @@ ipcRenderer.on('record', (event, arg) => {
         
         var findRecord = Enumerable.from(records).where(w => w.idRegistro === record.idRegistro).firstOrDefault();
 
-        if (findRecord || findRecord === null) {
+        if (findRecord === null) {
             records.push(record);
         } else {
             records = $.grep(records, function (r){

@@ -104,7 +104,7 @@ $(document).off('click', '#computerList a').on('click', '#computerList a', funct
         $(a).css('background-color', '');
     });
 
-    $(this).css('background-color', '#f4f4f4');
+    $(this).css('background-color', '#8bcb8d');
 
     if (!_newTicket) {
         $("#sDesktops").val(_idComputadora);

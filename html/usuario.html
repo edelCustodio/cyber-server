@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+    
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Skynet</title>
+
+        <!-- Vendor CSS -->
+        <link href="../libs/css/fullcalendar.min.css" rel="stylesheet">
+        <link href="../libs/css/animate.min.css" rel="stylesheet">       
+        <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
+        <link href="../libs/css/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
+        <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
+        <link href="../libs/css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
+        <link href="../libs/css/chosen.min.css" rel="stylesheet">
+        
+        <!-- CSS -->
+        <link href="../css/app.min.1.css" rel="stylesheet">
+        <link href="../css/app.min.2.css" rel="stylesheet"> 
+        <link href="../css/index.css" rel="stylesheet"> 
+        
+    </head>
+    <body data-ma-header="teal">
+        <header id="header" class="media">
+            <div class="pull-left h-logo">
+                <a href="index.html" class="hidden-xs">
+                    Skynet   
+                    <small>Cyber admin</small>
+                </a>
+                
+                <div class="menu-collapse" data-ma-action="sidebar-open" data-ma-target="main-menu">
+                    <div class="mc-wrap">
+                        <div class="mcw-line top palette-White bg"></div>
+                        <div class="mcw-line center palette-White bg"></div>
+                        <div class="mcw-line bottom palette-White bg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="pull-right h-menu">
+                <!--<li class="hm-search-trigger">
+                    <a href="#" data-ma-action="search-open">
+                        <i class="hm-icon zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                
+                <li class="dropdown hidden-xs hidden-sm h-apps">
+                    <a data-toggle="dropdown" href="#">
+                        <i class="hm-icon zmdi zmdi-apps"></i>
+                    </a>
+                    <ul class="dropdown-menu pull-right">
+                        <li>
+                            <a href="#">
+                                <i class="palette-Red-400 bg zmdi zmdi-calendar"></i>
+                                <small>Calendar</small>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="#">
+                                <i class="palette-Green-400 bg zmdi zmdi-file-text"></i>
+                                <small>Files</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Light-Blue bg zmdi zmdi-email"></i>
+                                <small>Mail</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Orange-400 bg zmdi zmdi-trending-up"></i>
+                                <small>Analytics</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Purple-300 bg zmdi zmdi-view-headline"></i>
+                                <small>News</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="palette-Blue-Grey bg zmdi zmdi-image"></i>
+                                <small>Gallery</small>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown hidden-xs">
+                    <a data-toggle="dropdown" href="#"><i class="hm-icon zmdi zmdi-more-vert"></i></a>
+                    <ul class="dropdown-menu dm-icon pull-right">
+                        <li class="hidden-xs">
+                            <a data-action="fullscreen" href="#"><i class="zmdi zmdi-fullscreen"></i> Toggle Fullscreen</a>
+                        </li>
+                        <li>
+                            <a data-action="clear-localstorage" href="#"><i class="zmdi zmdi-delete"></i> Clear Local Storage</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-face"></i> Privacy Settings</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="zmdi zmdi-settings"></i> Other Settings</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="hm-alerts" data-user-alert="sua-messages" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                    <a href="#"><i class="hm-icon zmdi zmdi-notifications"></i></a>
+                </li>-->
+                <li class="dropdown hm-profile">
+                    <a data-toggle="dropdown" href="#">
+                        <img src="../img/1.jpg" alt="">
+                    </a>
+                    
+                    <ul class="dropdown-menu pull-right dm-icon">
+                        <li>
+                            <a id="update" style="cursor: pointer;"><i class="zmdi zmdi-refresh zmdi-hc-fw"></i> Actualizar</a>
+                        </li>
+                       
+                        <li>
+                            <a id="logout" style="cursor: pointer;"><i class="zmdi zmdi-block zmdi-hc-fw"></i> Cerrar sesion</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!--
+            <div class="media-body h-search">
+                <form class="p-relative">
+                    <input type="text" class="hs-input" placeholder="Search for people, files & reports">
+                    <i class="zmdi zmdi-search hs-reset" data-ma-action="search-clear"></i>
+                </form>
+            </div>
+            -->
+        </header>
+
+        <section id="main">
+            <aside id="s-user-alerts" class="sidebar">
+                <ul class="tab-nav tn-justified tn-icon m-t-10" data-tab-color="teal">
+                    <!--<li><a class="sua-messages" href="#sua-messages" data-toggle="tab"><i class="zmdi zmdi-email"></i></a></li>-->
+                    <li><a class="sua-notifications" href="#sua-notifications" data-toggle="tab"><i class="zmdi zmdi-notifications"></i></a></li>
+                </ul>
+
+            </aside>
+
+            <aside id="s-main-menu" class="sidebar">
+                <div class="smm-header">
+                    <i class="zmdi zmdi-long-arrow-left" data-ma-action="sidebar-close"></i>
+                </div>
+
+                <ul class="smm-alerts">
+                    <li class="active" style="visibility: hidden;"  data-user-alert="sua-notifications" data-ma-action="sidebar-open" data-ma-target="user-alerts">
+                        <i class="zmdi zmdi-notifications"></i>
+                    </li>                    
+                </ul>
+                
+                <ul class="main-menu">
+                    <li>
+                        <a href="index.html"><i class="zmdi zmdi-home"></i> Principal</a>
+                    </li>
+                    <li><a href="punto-venta.html"><i class="zmdi zmdi-money"></i> Punto de venta</a></li>
+                    <li class="sub-menu active">
+                        <a data-ma-action="submenu-toggle"><i class="zmdi zmdi-collection-plus zmdi-hc-fw"></i> Catalogos</a>
+                        <ul>
+                            <li class="active"><a href="usuario.html"><i class="zmdi zmdi-account-add zmdi-hc-fw"></i> Usuario</a></li>
+                            <li><a href="producto.html"><i class="zmdi zmdi-truck zmdi-hc-fw"></i> Producto</a></li>
+                            <li><a href="computadora.html"><i class="zmdi zmdi-desktop-mac zmdi-hc-fw"></i> Computadora</a></li>
+                        </ul>
+                    </li>
+                    <!-- <li><a href="widgets.html"><i class="zmdi zmdi-storage" ></i> Inventario</a></li>
+                    <li><a href="widgets.html"><i class="zmdi zmdi-card"></i> Creditos</a></li>
+                    <li><a href="invoice.html"><i class="zmdi zmdi-storage"></i> Facturas</a></li> -->
+                </ul>
+            </aside>
+
+            <section id="content">
+                <div class="container">
+                    <div class="c-header">
+                        <h2>Catalago de usuarios</h2>
+                    </div>
+    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Crear nuevo usuario 
+                                <small>
+                                </small>
+                            </h2>
+                        </div>
+
+                        <div class="card-body card-padding">
+                            <form data-toggle="validator">
+                                <div class="form-group fg-line">
+                                    <!-- <div class="fg-line"> -->
+                                    <input 
+                                        type="text"
+                                        class="form-control input-sm"
+                                        name="nombre" id="nombre"
+                                        required
+                                        placeholder="Nombre completo"
+                                        data-error="No ha ingresado su nombre">
+                                    <!-- <label class="fg-label">Nombre completo</label> -->
+                                    <small class="help-block with-errors"></small>
+                                    <!-- </div> -->
+                                </div>
+                                <div class="form-group fg-line">
+                                    <input 
+                                        type="email" 
+                                        class="form-control input-sm" 
+                                        id="mail" 
+                                        required
+                                        placeholder="Correo electronico"
+                                        data-error="Correo invalido">
+                                    <!-- <label class="fg-label">Nombre completo</label> -->
+                                    <small class="help-block with-errors"></small>
+                                </div>
+                                <div class="form-group fg-line">
+                                    <input 
+                                        type="text" 
+                                        class="form-control input-sm" 
+                                        id="usuario"
+                                        required 
+                                        placeholder="Usuario"
+                                        data-error="No ha ingresado su usuario">
+                                    <small class="help-block with-errors"></small>
+                                </div>
+                                <div class="form-group fg-line">
+                                    <input 
+                                        type="password" 
+                                        class="form-control input-sm" 
+                                        id="password" 
+                                        placeholder="Contraseña"
+                                        required
+                                        data-error="No ha ingresado su constraseña">
+                                    <small class="help-block with-errors"></small>
+                                </div>
+                                <button id="btnCrear" class="btn btn-primary btn-sm m-t-10">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Textarea <small>Form control which supports multiple lines of text. Change 'rows' attribute as necessary.</small></h2>
+                        </div>
+
+                        <div class="card-body card-padding">
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer id="footer">
+                Copyright &copy; 2017 friasoftIt
+
+                <ul class="f-menu">
+                    <li><a >Home</a></li>
+                    <li><a >Dashboard</a></li>
+                    <li><a >Reports</a></li>
+                    <li><a >Support</a></li>
+                    <li><a >Contact</a></li>
+                </ul>
+            </footer>
+
+        </section>
+
+        <!-- Page Loader -->
+        <div class="page-loader palette-Teal bg">
+            <div class="preloader pl-xl pls-white">
+                <svg class="pl-circular" viewBox="25 25 50 50">
+                    <circle class="plc-path" cx="50" cy="50" r="20"/>
+                </svg>
+            </div>
+        </div>        
+        
+        <script src="../js/common.js"></script>
+        <!-- Javascript Libraries -->
+        <script src="../libs/js/bootstrap.min.js"></script>
+       
+        <!--<script src="./vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>-->
+        <script src="../libs/js/waves.min.js"></script>
+        <script src="../libs/js/bootstrap-growl.min.js"></script>
+        <script src="../libs/js/moment.min.js"></script>
+        <script src="../libs/js/fullcalendar.min.js"></script>
+        <script src="../libs/js/jquery.simpleWeather.min.js"></script>
+        <script src="../libs/js/salvattore.min.js"></script>
+        
+        <script src="../libs/js/jquery.flot.js"></script>
+        <script src="../libs/js/jquery.flot.resize.js"></script>
+        <script src="../libs/js/curvedLines.js"></script>
+        <script src="../libs/js/jquery.sparkline.min.js"></script>
+        <script src="../libs/js/mfb.min.js"></script>
+        <script src="../libs/js/typeahead.bundle.min.js"></script>
+        <script src="../libs/js/chosen.jquery.min.js"></script>
+        
+        
+
+        <!-- Placeholder for IE9 -->
+        <!--[if IE 9 ]>
+        <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
+        <![endif]-->
+        
+        <script src="../js/functions.js"></script>
+        <script src="../js/actions.js"></script>
+        <script src="../js/demo.js"></script>
+        
+        <!-- <script src="../js/client_side/index.js"></script> -->
+    
+    </body>
+</html>

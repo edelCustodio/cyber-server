@@ -23,7 +23,8 @@ var CyberControl = {
             
             if (clients.length > 0) {
                 for (var i = 0; i < clients.length; i++) {
-                    if (clients[i].sock.remoteAddress === client.sock.remoteAddress) {
+                    const remoteAddress = clients[i].sock.remoteAddress;
+                    if (remoteAddress.includes(client.sock.remoteAddress)) {
                         clients[i] = client;
                         console.log('I just to update the client list for '+ client.sock.remoteAddress);
                     }else{
@@ -71,7 +72,8 @@ var CyberControl = {
 
                             if (clients.length > 0) {
                                 clients.forEach(c => {
-                                    if(c.sock.remoteAddress === j.IP) {
+                                    const remoteAddress = c.sock.remoteAddress;
+                                    if(remoteAddress.includes(j.IP)) {
                                         client.data = j;
                                         c = client;
                                     }
@@ -84,7 +86,8 @@ var CyberControl = {
 
                 if (jsonData !== null && jsonData.IP !== undefined) {
                     for(var i = 0; i < clients.length; i++) {
-                        if(clients[i].sock.remoteAddress === jsonData.IP) {
+                        const remoteAddress = clients[i].sock.remoteAddress;
+                        if(remoteAddress.includes(jsonData.IP)) {
                             clients[i].data = jsonData;
                         }
                     }
@@ -100,6 +103,7 @@ var CyberControl = {
             // Add a 'close' event handler to this instance of socket
             sock.on('close', function(data) {
                 var textData = data.toString('utf8');
+                main.getMainWindow().webContents.send('clientClosed', sock.remoteAddress);
                 console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
             });
         
