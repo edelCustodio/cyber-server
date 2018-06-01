@@ -195,8 +195,6 @@ function guardarTicketVenta(saleTicket) {
                         // eliminar registro
                         deleteDesktopRecord();
 
-                        // eliminar computadora procesada
-                        // deleteDesktopPurchased();
                     } else {
                         sessionStorage.removeItem('saleTicket');
                     }

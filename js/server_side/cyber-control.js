@@ -53,31 +53,27 @@ var CyberControl = {
                         if(str.length > 0) {
                             str = str + '}';
                             const j = JSON.parse(str);
-                            if (desktopNames.length === 0) {
-                                desktopNames.push(j.hostname);
-                                desktopsArray.push(j);
-                            } else {
-                                const name = desktopNames.filter(w => w === j.hostname)[0];
-                                if(name.length === 0) {
+                            if(j.hostname !== undefined) {
+                                if (desktopNames.length === 0) {
                                     desktopNames.push(j.hostname);
                                     desktopsArray.push(j);
-                                }
-                            }
-
-                            // for(var i = 0; i < clients.length; i++) {
-                            //     if(clients[i].sock.remoteAddress === j.IP) {
-                            //         clients[i].data = j;
-                            //     }
-                            // }
-
-                            if (clients.length > 0) {
-                                clients.forEach(c => {
-                                    const remoteAddress = c.sock.remoteAddress;
-                                    if(remoteAddress.includes(j.IP)) {
-                                        client.data = j;
-                                        c = client;
+                                } else {
+                                    const name = desktopNames.filter(w => w === j.hostname)[0];
+                                    if(name.length === 0) {
+                                        desktopNames.push(j.hostname);
+                                        desktopsArray.push(j);
                                     }
-                                });
+                                }
+    
+                                if (clients.length > 0) {
+                                    clients.forEach(c => {
+                                        const remoteAddress = c.sock.remoteAddress;
+                                        if(remoteAddress.includes(j.IP)) {
+                                            client.data = j;
+                                            c = client;
+                                        }
+                                    });
+                                }
                             }
                         }
                     });
@@ -115,6 +111,14 @@ var CyberControl = {
                 console.error('Client Error message: ' + data.message + '\n\nStack' + data.stack);
             });
             
+        });
+
+        server.getConnections((err, count) => {
+            if(!err) {
+                console.log(count);
+            } else {
+                console.log(err);
+            }
         });
       
         server.listen(port, host);

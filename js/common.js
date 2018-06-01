@@ -9,6 +9,7 @@ var _newTicket = false;
 var _idComputadora = 0;
 var _idRegistro = 0;
 var _arrClients = [];
+var moment = require('moment');
 
 
 /*--------------------------------------

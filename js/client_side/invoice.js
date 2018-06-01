@@ -1,5 +1,6 @@
 var ipcRenderer = require('electron').ipcRenderer;
 window.$ = window.jQuery = require('../libs/js/jquery.min.js');
+var moment = require('moment');
 let apiURL = '';
 
 
@@ -45,9 +46,10 @@ function getTicketInfo() {
                 var titulo = $('#titulo').html();
                 var fechaHora = $('#fechaHoraNoTicket').html();
                 var hoy = new Date();
+                var m = moment(hoy);
 
                 fechaHora = fechaHora.replace('{noTicket}', idTicket);
-                fechaHora = fechaHora.replace('{fecha}', hoy.toLocaleDateString() + ' ' + hoy.toLocaleTimeString());
+                fechaHora = fechaHora.replace('{fecha}', m.format('DD/MM/YYYY h:mm A'));
                 titulo = titulo.replace('{subtitulo}', fechaHora);
                 $('#titulo').html(titulo);
 
@@ -64,18 +66,25 @@ function getTicketInfo() {
 function printTicket() {
     const path = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
     var idTicket = sessionStorage.getItem('idTicket')
-    ipcRenderer.send('createPDF', path + '/invoices/enlace-factura-' + idTicket + '.pdf');
+    ipcRenderer.send('printTicket', path + '/invoices/enlace-factura-' + idTicket + '.pdf');
 }
 
 /**
  * Once a pdf was created, it returns to validate if was created correctly
  * and go back to punto-venta.html
  */
-ipcRenderer.on('PDFCreated', (event, arg) => {
+ipcRenderer.on('ticketPrinted', (event, arg) => {
     var pdfCreated = JSON.parse(arg);
     if (pdfCreated.result) {
+        console.log(pdfCreated.result);
         location.href = 'punto-venta.html';
     } else {
         console.log(pdfCreated.message);
     }
+});
+
+
+$(document).on('click', '#btnPrint', function() {
+    // printTicket();
+    // window.print();
 });

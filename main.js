@@ -6,10 +6,22 @@ const os = require('os');
 const { autoUpdater } = require('electron-updater')
 const isDev = require('electron-is-dev')
 const log = require('electron-log');
+const thermal_printer = require("node-thermal-printer");
+const printer = require("printer");
+const util = require('util');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 log.info('App starting...');
+
+// obtener impresora termica
+var ecline = printer.getPrinter('EC-PM-5890X');
+
+// configuracion inicial para la impresora
+thermal_printer.init({
+  type: 'epson'
+});
+thermal_printer.alignCenter();
 
 // Module to control application life.
 const app = electron.app
@@ -54,7 +66,7 @@ var Main = {
       slashes: true
     }));
 
-    mainWindow.setMenu(null);
+    // mainWindow.setMenu(null);
   
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
@@ -85,33 +97,38 @@ var Main = {
 }
 
 /**
- * Convert ticket on PDF
+ * Imprimir ticket
  */
-ipcMain.on('createPDF', (event, arg) => {
-  const fileName = arg;
-
-  mainWindow.webContents.printToPDF({
-    printBackground: true,
-    landscape: false
-  }, function(err, data) {
-    console.log(data);
-    fs.writeFile(fileName, data, function(err) {
-      let pdfCreated = { result: true };
-      if(!err) {
-        event.sender.send('PDFCreated', JSON.stringify(pdfCreated));
-      } else {
-        pdfCreated.result = false;
-        pdfCreated.message = err;
-        event.sender.send('PDFCreated', JSON.stringify(pdfCreated));
-      }
-    })
-  });
+ipcMain.on('printTicket', (event, arg) => {
+  let ticketPrinted = { result: true };
+  try {
+    const fileName = arg;
+    mainWindow.webContents.print({silent: true});
+    event.sender.send('ticketPrinted', JSON.stringify(ticketPrinted));
+  } catch (e) {
+    ticketPrinted.result = false;
+    ticketPrinted.message = err;
+    event.sender.send('ticketPrinted', JSON.stringify(ticketPrinted));
+  }
+  
 });
 
 
 /**
  * Update app
  */
+
+/**
+ * Envia notificacion a la pantalla principal
+ * acerca del status de la actualizacion
+ * @param {*} text Texto a enviar
+ */
+function sendStatusToWindow(text) {
+  let title = mainWindow.getTitle();
+  mainWindow.setTitle(title + ": " + text);
+  log.info(text);
+}
+
 autoUpdater.on('checking-for-update', () => {
   sendStatusToWindow('Checking for update...');
 })
