@@ -9,7 +9,7 @@ const BrowserWindow = remote.BrowserWindow
 //document ready
 $(document).ready(function () {
     _arrClients = remote.getGlobal('clients');
-    drawDesktops();    
+    drawDesktops();
 });
 
 
@@ -252,8 +252,8 @@ $('#showAddProductModal').click(function () {
 //Seleccionar computadora, comprobar si existen productos asociados a la computadora seleccionada
 //si existe, mostrarlos en el grid
 $('#sDesktops').change(function () {
-    var idComputadora = parseInt($(this).val());
-    createGridProduct(idComputadora);
+    _idComputadora = parseInt($(this).val());
+    createGridProduct();
 });
 
 

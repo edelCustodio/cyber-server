@@ -208,9 +208,12 @@
                                 <div class="card-header">
                                     <h2>Agregar producto</h2>
                                     <div class="toggle-switch actions" data-ts-color="green" style="font-size: 12px; color: #777777;">
-                                        <label for="newTicket" class="ts-label">Crear nuevo ticket</label>
-                                        <input id="newTicket" type="checkbox" hidden="hidden">
-                                        <label for="newTicket" class="ts-helper"></label>
+                                        <!-- <label for="newTicket" class="ts-label">Crear nuevo ticket</label> -->
+                                        <button id="newTicket" class="btn btn-primary btn-icon waves-effect waves-circle waves-float">
+                                            <i class="zmdi zmdi-shopping-cart-plus zmdi-hc-fw"></i>
+                                        </button>
+                                        <!-- <input id="newTicket" type="checkbox" hidden="hidden">
+                                        <label for="newTicket" class="ts-helper"></label> -->
                                     </div>
                                 </div>
         
@@ -394,7 +397,7 @@
             <tr>
                 <td class="text-left">
                     <button 
-                        id="delete-{idComputadora}-{idProducto}"
+                        id="delete-{idTicketDetalle}"
                         type="button" 
                         class="btn btn-icon command-delete waves-effect waves-circle" 
                         data-row-id="10253">
@@ -421,8 +424,11 @@
         </script>
 
         <script id="itemComputerList" type="text/x-friasoft-tmpl">
-            <a style="cursor: pointer;" class="list-group-item media" id="{idComputadora}">
+            <a style="cursor: pointer;" class="list-group-item media" id="{idTicket}">
                 <div class="pull-left">
+                    <button id="eliminar-{idTicket}" type="button" class="btn btn-icon command-delete waves-effect waves-circle" data-row-id="10253">
+                        <span class="zmdi zmdi-delete"></span>
+                    </button>
                     <img class="avatar-img" src="../img/tech.png" alt="">
                 </div>
 
@@ -430,7 +436,7 @@
                     <div class="lgi-heading">{computerName}</div>
                     <small class="lgi-text">{products}</small>
                     <small class="lgi-text">{hora}</small>
-                </div>
+                </div>                
             </a>
         </script>
         

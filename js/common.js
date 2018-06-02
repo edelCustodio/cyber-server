@@ -10,6 +10,10 @@ var _idComputadora = 0;
 var _idRegistro = 0;
 var _arrClients = [];
 var moment = require('moment');
+var _tickets = [];
+var _ticket = {};
+var _recordsNoPay = [];
+var _idTicket = 0;
 
 
 /*--------------------------------------
@@ -82,10 +86,11 @@ function alertExecuteFunction(title, text, type, functionHandle) {
         if (result.value) {
             functionHandle();
         }
-    })
+    });
 }
 
 $(document).ready(function () {
+    
     if (sessionStorage.getItem('IPServer') !== null) {
         apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':7070';
     } else {
@@ -147,12 +152,13 @@ $('#sProductos').change(function () {
         return;
     }
 
-    if(!_newTicket) {
-        var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
+
+    if(document.location.href.includes('index.html')) {
+        _idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
         $("#iCantidad").val('');
         $('#iTotal').val('');
 
-        if(idComputadora > 0) {
+        if(_idComputadora > 0) {
             var idProducto = parseInt(sProductos.val());
             
             var producto = getProductSelected(idProducto);
@@ -169,14 +175,23 @@ $('#sProductos').change(function () {
 
         }
     } else {
-        var sProductos = $(this);
-        $("#iCantidad").val('');
-        $('#iTotal').val('');
-        
-        // obtener producto
-        var producto = getProductSelected(parseInt(sProductos.val()));
-        //set precio
-        $('#iPrecio').val(producto.precio);
+        if (_idTicket > 0) {
+            var sProductos = $(this);
+            $("#iCantidad").val('');
+            $('#iTotal').val('');
+            
+            // obtener producto
+            var producto = getProductSelected(parseInt(sProductos.val()));
+            //set precio
+            $('#iPrecio').val(producto.precio);
+        } else {
+            //sweet alert
+            alertNotify('Ups!', 'Por favor, seleccione un ticket para poder agregar un producto.', 'warning');
+            //  chosen-default
+            $('.chosen-single').addClass('chosen-default');
+            $('.chosen-single span').html('Seleccione un producto...');
+            sProductos.val(0);
+        }
     }
 });
 
@@ -254,10 +269,51 @@ function getProducts() {
             });
         }
     
+        // Obtener tickets pendientes por cobrar
+        getTicketsPending();
+
+        setTimeout(() => {
+            getRecordsNoPay();
+        }, 500);
+
         $('.chosen-single').css('text-transform', 'none');
+    });
+
+    
+}
+
+/**
+ * Obtener los tickets pendientes por pagar
+ */
+function getTicketsPending(showGrid = false) {
+     $.get(apiURL + "/api/getTicketsPending", function(response) {
+        if (response.result) {
+            _tickets = response.data;
+
+            if(showGrid) {
+                const ticket = Enumerable.from(_tickets).where(w => w.idTicket === _idTicket).firstOrDefault();
+                mostrarProductosEnGrid(ticket);
+                // createGridProduct();
+            }
+        }
     });
 }
 
+/**
+ * Obtener los tickets pendientes por pagar
+ */
+function getRecordsNoPay() {
+    $.get(apiURL + "/api/getRecordsNoPay", function(response) {
+        if (response.result) {
+            _recordsNoPay = response.data;
+        }
+   });
+}
+
+/**
+ * Llenar el dropdown de productos en el modulo
+ * de agregar producto al ticket
+ */
 function fillDesktopDropdown() {
     var $sDesktops = $('#sDesktops');
     $sDesktops.empty();
@@ -291,61 +347,33 @@ $('#btnAgregarProducto').click(function () {
 });
 
 /**
- * delete grid row tickets
+ * eliminar registro del ticket, esto solo hace un borrado logico
+ * en la base de datos
  */
 $(document).off('click', 'button[id^="delete"]').on('click', 'button[id^="delete"]', function () {
-    var tr = $(this).parent().parent();
-
-    if(!_newTicket) { 
-        var idProducto = parseInt($(this).attr('id').split('-')[2]);
-        var idComputadora = parseInt($(this).attr('id').split('-')[1]);
-        var deleteDesktop = false;
     
-        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
+    var btn = $(this);
+    var tr = btn.parent().parent();
+    var idTicketDetalle = parseInt(btn.attr('id').split('-')[1]);
     
-        //remove product from tickets array
-        $.each(tickets, function(i, t) {
-            t.productos = $.grep(t.productos, function(p) { 
-                return p.idProducto !== idProducto; 
-            });
-    
-            if (t.productos.length === 0)
-                deleteDesktop = true;
-        });
-    
-        if (deleteDesktop) {
-            tickets = $.grep(tickets, function(t) { 
-                return t.idComputadora !== idComputadora; 
-            });
+    swal({
+        title: 'Eliminar producto',
+        text: 'Desea eliminar el producto?',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ok'
+    }).then((result) => {
+        if (result.value) {
+            eliminarTicketDetalle(idTicketDetalle);
         }
-    
-        sessionStorage.removeItem('tickets');
-        tr.remove();
-        
-        if (tickets.length > 0)
-            sessionStorage.setItem('tickets', JSON.stringify(tickets));
-        
-        //recreate grid ticket product
-        createGridProduct(idComputadora);
-    } else {
-        var idProducto = parseInt($(this).attr('id').split('-')[2]);
-        var saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
-
-        saleTicket.ticketsDetalle = $.grep(saleTicket.ticketsDetalle, function (r) {
-            return r.idProducto !== idProducto;
-        });   
-
-        var total = Enumerable.from(saleTicket.ticketsDetalle).sum(s => s.total);
-        $('#tbListProducts').append(sumTotalSaleTicket(total));
-        tr.remove();
-        sessionStorage.setItem('saleTicket', JSON.stringify(saleTicket));
-
-        // mensaje de elimar producto
-        notify('top', 'right', 'fa fa-comments', 'success', ' Producto eliminado, ', 'el producto fue eliminado satisfactoriamente.');
-    }
+    });
 });
 
-//Agregar productos al ticket con la computadora seleccionada
+/**
+ * Agregar productos al ticket con la computadora seleccionada
+ */
 function addProductToTicket() {
 
     var idProducto = parseInt($('#sProductos').val());
@@ -353,150 +381,41 @@ function addProductToTicket() {
     var cantidad = parseInt($('#iCantidad').val());
     var precio = parseFloat($('#iPrecio').val());
     var total = parseFloat($('#iTotal').val());
-    var idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
-    let records = [];
-
-    if (sessionStorage.getItem('desktopRecords') !== null) {
-        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
+    if (_idComputadora === 0) {
+        _idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
     }
 
-    if (_idRegistro === 0) {
-        if (records.length > 0) {
-            _idRegistro = Enumerable.from(records).where(w => w.idComputadora === idComputadora && w.fechaFin === null).select(s => s.idRegistro).firstOrDefault();
-        }
-    }
+    const ticket = Enumerable.from(_tickets).where(w => w.idTicket === _idTicket).firstOrDefault();
+    const found = Enumerable.from(ticket.ticketsDetalle).where(w => w.idProducto === idProducto).firstOrDefault();
 
-    if (!_newTicket) {
-        _countNewTicket = 0;
-        var nombreComputadora = $('#sDesktops option:selected').val();
-        var tickets = [];
-        var ticket = {
-            idComputadora: _idComputadora,
-            idRegistro: _idRegistro,
-            nombreComputadora: '',
-            productos: []
-        };
-        
+    // Insertar nuevo registro
+    if (found === null) {
         // detalle del ticket
-        var ticketD = {
+        var ticketDetalle = {
+            idTicket: ticket.idTicket,
             idProducto: idProducto,
-            nombre: nombre,
-            precio: precio,
-            cantidad: cantidad,
-            total: total
-        }
-    
-        if (sessionStorage.getItem('tickets') !== null) {
-            tickets = JSON.parse(sessionStorage.getItem('tickets'));
+            cantidad: cantidad
         }
 
-        if (tickets.length > 0) {
-    
-            const ticketExists = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora && w.idRegistro === _idRegistro).firstOrDefault();
-            
-            //if there is an existing product, update its values
-            if(ticketExists !== null) {
-                var productoExistente = Enumerable.from(ticketExists.productos).where(w1 => w1.idProducto === idProducto).firstOrDefault();
-
-                if(productoExistente !== null) {
-                    productoExistente.cantidad = ticketD.cantidad;
-                    productoExistente.total = ticketD.total;
-                    productoExistente.precio = ticketD.precio;
-                } else {
-                    // quitar objeto existente
-                    tickets = $.grep(tickets, function (t) {
-                        return t.idRegistro !== _idRegistro
-                    });
-
-                    // agregar objeto con nuevos elementos
-                    ticketExists.productos.push(ticketD);
-                    tickets.push(ticketExists);
-                }
-                
-            } else { //add new product
-                //validate if there is an existing desktop on tickets    
-                ticket.idComputadora = idComputadora;
-                ticket.nombreComputadora = nombreComputadora;
-                ticket.productos.push(ticketD);
-                tickets.push(ticket);
-            }
-        } else {
-            ticket.idComputadora = idComputadora;
-            ticket.nombreComputadora = nombreComputadora;
-            ticket.productos.push(ticketD);
-            tickets.push(ticket);
-        }
-    
-        sessionStorage.removeItem('tickets');
-        sessionStorage.setItem('tickets', JSON.stringify(tickets));
-    
-        var desktops = JSON.parse(sessionStorage.getItem('desktops'));
-    
-        var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === _idComputadora).select(s => s.nombre).firstOrDefault();
-        var recordTime = new Date(Enumerable.from(records).where(w => w.idRegistro === _idRegistro).select(s => s.fechaInicio).firstOrDefault());
-        $('#hDesktopName').html(desktopName + ' - ' + recordTime.toLocaleTimeString());
-
-        //recreate grid ticket product
-        createGridProduct(idComputadora);
+        // insertar registro del detalle del ticket
+        insertTicketDetalle(ticketDetalle);
     } else {
-        
-        var saleTicket = {};
+        // actualizar registro existente
+        actualizarTicketDetalle(found.idTicketDetalle, cantidad);
 
-        var detalle = {
-            idTicketDetalle: 0,
-            idTicket: 0,
-            idProducto: idProducto,
-            cantidad: cantidad,
-            idRegistroComputadora: 0,
-            nombre: nombre,
-            precio: precio,
-            total: (precio * cantidad)
-        }
-
-        if (sessionStorage.getItem('saleTicket') !== null) {
-            saleTicket = JSON.parse(sessionStorage.getItem('saleTicket'));
-
-            var ticketD = Enumerable.from(saleTicket.ticketsDetalle).where(w => w.idProducto === detalle.idProducto).firstOrDefault();
-
-            if (ticketD) {
-                detalle.cantidad = ticketD.cantidad + detalle.cantidad;
-                detalle.total = ticketD.total + detalle.total;
-                saleTicket.ticketsDetalle = $.grep(saleTicket.ticketsDetalle, function (r){
-                    return r.idProducto !== detalle.idProducto;
-                });   
-            }
-        } else {
-            saleTicket = {
-                total: 0,
-                pago: 0,
-                cambio: 0,
-                idRegistro: 0,
-                ticketsDetalle: []
-            }            
-        }
-
-        saleTicket.ticketsDetalle.push(detalle);
-        $('#tbListProducts').empty();
-
-        $(saleTicket.ticketsDetalle).each(function (i, d) {
-
-            var rowTemplate = $('#trRowGridTicket').html();
-            rowTemplate = rowTemplate.replace('{idComputadora}', 0).replace('{idProducto}', d.idProducto);
-            rowTemplate = rowTemplate.replace('{contador}', i + 1);
-            rowTemplate = rowTemplate.replace('{nombre}', d.nombre);
-            rowTemplate = rowTemplate.replace('{precio}', d.precio);
-            rowTemplate = rowTemplate.replace('{cantidad}', d.cantidad);
-            rowTemplate = rowTemplate.replace('{total}', d.total);
-
-            $('#tbListProducts').append(rowTemplate);
-        });
-
-        var total = Enumerable.from(saleTicket.ticketsDetalle).sum(s => s.total);
-        $('#tbListProducts').append(sumTotalSaleTicket(total));
-
-        sessionStorage.setItem('saleTicket', JSON.stringify(saleTicket));
+        // actualizar lista de maquinas
+        actualizarListaTickets();
     }
-
+   
+    
+    // actualizar la lista de tickets en la pagina de punto de venta
+    if (document.location.href.includes('punto-venta.html')) {
+        actualizarListaTickets();
+    }
+    
+    // muestra el nombre del ticket
+    mostrarNombreTicket(ticket);
+    
     // clean controls
     $('#iCantidad').val('');
     $('#iPrecio').val('');
@@ -510,6 +429,222 @@ function addProductToTicket() {
 }
 
 /**
+ * Mostrar nombre en el grid del detalle del ticket
+ * @param {*} ticket ticket que sera mostrado
+ */
+function mostrarNombreTicket(ticket) {
+    // colocar titulo al grid
+    var ticketTitle = '';
+    if (ticket.idRegistro !== null) {
+        var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        var record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === ticket.idRegistro).firstOrDefault();
+        if (record !== null) {
+            var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === record.idComputadora).select(s => s.nombre).firstOrDefault();
+            var recordTime = moment(record.fechaInicio);
+            ticketTitle = desktopName + ' - ' + recordTime.format('DD/MM/YYYY h:mm A');
+        } else {
+            const fecha = moment(ticket.fecha);
+            ticketTitle = 'Ticket No. ' + _idTicket + ', ' + fecha.format('DD/MM/YYYY h:mm A');
+        }        
+    } else {
+        const fecha = moment(ticket.fecha);
+        ticketTitle = 'Ticket No. ' + _idTicket + ', ' + fecha.format('DD/MM/YYYY h:mm A');
+    }
+
+    // mostrar titulo arriba del grid de los productos
+    $('#hDesktopName').html(ticketTitle);
+}
+
+
+/**
+ * Construye el grid para los tickets que no estan asociados
+ * a una maquina en uso
+ * @param {*} ticket Arreglo detalle del ticket
+ */
+function mostrarProductosEnGrid(ticket) {
+    $('#tbListProducts').empty();
+
+    var gridProduct = '';
+    const productos = JSON.parse(sessionStorage.getItem('products'));
+    var totalTicket = 0;
+    var tieneRentaEquipo = false;
+    if (ticket !== null) {
+        $.each(ticket.ticketsDetalle, function (i, d) {
+            var rowTemplate = $('#trRowGridTicket').html();
+            const producto = Enumerable.from(productos).where(w => w.idProducto === d.idProducto).firstOrDefault();
+            let total = 0;
+            if (_recordsNoPay.length > 0 && ticket.idRegistro !== null) {
+                if (d.idProducto === 1360) {
+                    const record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === ticket.idRegistro).firstOrDefault();
+                    if (record !== null) {
+                        total = record.totalPagar === null ? 0 : record.totalPagar;
+                        rowTemplate = rowTemplate.replace('{precio}', total);
+                        tieneRentaEquipo = true;
+                        idTicketDetalle = d.idTicketDetalle;
+                    } else {
+                        total = producto.precio * d.cantidad;
+                        rowTemplate = rowTemplate.replace('{precio}', producto.precio);
+                    }
+                } else {
+                    total = producto.precio * d.cantidad;
+                    rowTemplate = rowTemplate.replace('{precio}', producto.precio);
+                }
+            } else {
+                total = producto.precio * d.cantidad;
+                rowTemplate = rowTemplate.replace('{precio}', producto.precio);
+            }
+            rowTemplate = rowTemplate.replace('{idTicketDetalle}', d.idTicketDetalle);
+            rowTemplate = rowTemplate.replace('{contador}', i + 1);
+            rowTemplate = rowTemplate.replace('{nombre}', producto.nombre);
+            
+            rowTemplate = rowTemplate.replace('{cantidad}', d.cantidad);
+            rowTemplate = rowTemplate.replace('{total}', total);
+            totalTicket = totalTicket + total;
+            gridProduct += rowTemplate;
+        });
+    
+        var rowTotal = $('#trRowGridTicketTotal').html();
+        rowTotal = rowTotal.replace('{Total}', totalTicket);
+        gridProduct += rowTotal;
+    
+        $('#tbListProducts').append(gridProduct);
+    
+        // eliminar boton de borrar para los registros
+        // de renta de equipo
+        if (tieneRentaEquipo) {
+            $('button[id="delete-'+ idTicketDetalle +'"]').remove();
+        }
+    }
+}
+
+/**
+ * Crear la lista de computadoras pendientes por cobrar
+ */
+function fillComputerList() {
+    var computerList = $('#computerList');
+    const desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    computerList.empty();
+    $.each(_tickets, function (i, tick) {
+        var itemComputerListTemplate = $('#itemComputerList').html();
+        itemComputerListTemplate = itemComputerListTemplate.replace('{idTicket}', tick.idTicket);
+        itemComputerListTemplate = itemComputerListTemplate.replace('{idTicket}', tick.idTicket);
+        
+        if (tick.idRegistro !== null) {
+            const record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === tick.idRegistro).firstOrDefault();
+            if (record !== null) {
+                itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', getDesktopName(record.idComputadora));
+                const startTime = moment(record.fechaInicio);
+                itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
+            } else {
+                // Esto no debe de pasar
+                itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', 'Ticket No. ' + tick.idTicket);
+                const startTime = moment(tick.fecha);
+                itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
+            }
+        } else {
+            itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', 'Ticket No. ' + tick.idTicket);
+            const startTime = moment(tick.fecha);
+            itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
+        }
+        
+        itemComputerListTemplate = itemComputerListTemplate.replace('{products}',  tick.ticketsDetalle.length + (tick.ticketsDetalle.length === 1 ? ' producto' : ' productos'));
+
+        computerList.append(itemComputerListTemplate);
+    });
+}
+
+
+/**
+ * Crear ticket
+ * @param {*} ticket 
+ */
+function crearTicket(ticket) {
+    $.post(apiURL + '/api/createTicket', ticket, function (data) {
+        if (data.result) {
+            // Obtener tickets pendientes por cobrar
+            getTicketsPending();
+
+            _idTicket = data.ticket.idTicket;
+        }
+    });
+}
+
+/**
+ * Insertar detalle del ticket
+ * @param {*} ticketDetalle objeto del registro que sera insertado
+ */
+function insertTicketDetalle(ticketDetalle) {
+    const insert = buildTicketDetailInsert(ticketDetalle);
+    $.post(apiURL + '/api/createTicketDetalle', { strInsert: insert }, function(data) {
+        if (data.result) {
+            getTicketsPending(true);
+        }
+    });
+}
+
+/**
+ * Insertar detalle del ticket
+ * @param {*} ticketDetalle objeto del registro que sera insertado
+ */
+function actualizarTicketDetalle(idTicketDetalle, cantidad) {
+    $.post(apiURL + '/api/updateTicketDetalle', { idTicketDetalle: idTicketDetalle, cantidad: cantidad }, function(data) {
+        if (data.result) {
+            getTicketsPending(true);
+        }
+    });
+}
+
+
+/**
+ * Eliminado logico de la tabla ticketDetalle, solo
+ * actualiza el campo eliminado a 1
+ * @param {*} idTicketDetalle IdTicketDetalle
+ */
+function eliminarTicketDetalle(idTicketDetalle) {
+    $.post(apiURL + '/api/deleteTicketDetalle', { idTicketDetalle: idTicketDetalle }, function(data) {
+        if (data.result) {
+            getTicketsPending(true);
+            // mensaje de elimar producto
+            notify('top', 'right', 'fa fa-comments', 'success', ' Producto eliminado, ', 'el producto fue eliminado satisfactoriamente.');
+
+            // actualizar lista de los tickets
+            actualizarListaTickets();
+        }
+    });
+}
+
+function actualizarListaTickets() {
+    setTimeout(() => {
+        fillComputerList();
+        $('#computerList a[id="' + _idTicket + '"]').trigger('click');
+    }, 500);
+}
+
+/**
+ * Eliminado logico de la tabla ticketDetalle, solo
+ * actualiza el campo eliminado a 1
+ * @param {*} idTicketDetalle IdTicketDetalle
+ */
+function eliminarTicket(idTicket) {
+    $.post(apiURL + '/api/deleteTicket', { idTicket: idTicket }, function(data) {
+        if (data.result) {
+            getTicketsPending(true);
+
+            notify('top', 'right', 'fa fa-comments', 'success', ' Ticket eliminado, ', 'el ticket fue eliminado satisfactoriamente.');
+        }
+    });
+}
+
+/**
+ * Construye el insert para el detalle del ticket
+ * @param {array} ticketDetalle objeto del registro que sera insertado
+ */
+function buildTicketDetailInsert(ticketDetalle) {
+    return `INSERT INTO Entidad.TicketDetalle (idTicket, idProducto, cantidad) 
+                    VALUES (` + ticketDetalle.idTicket + `, ` + ticketDetalle.idProducto + `, ` + ticketDetalle.cantidad + `)`;
+}
+
+/**
  * Suma el total del productos para un ticket de venta independiente
  */
 function sumTotalSaleTicket(total) {
@@ -520,38 +655,6 @@ function sumTotalSaleTicket(total) {
     var rowTotal = $('#trRowGridTicketTotal').html();
     rowTotal = rowTotal.replace('{Total}', total);
     return rowTotal;
-}
-
-/**
- * Create or build the full grid ticket product to show the product list associated to the desktop.
- */
-function createGridProduct(idComputadora) {
-    $('#tbListProducts').empty();
-    // var idComputadora = parseInt($('#sDesktops').val());
-    var tickets = JSON.parse(sessionStorage.getItem('tickets'));
-    var productos = Enumerable.from(tickets).where(w => w.idComputadora === idComputadora && w.idRegistro === _idRegistro).select(s => s.productos).firstOrDefault();
-    var total = 0;
-
-    if (productos !== null && productos.length > 0) {
-        var gridProduct = '';
-        $.each(productos, function (i, p) {
-            var rowTemplate = $('#trRowGridTicket').html();
-            rowTemplate = rowTemplate.replace('{idComputadora}', idComputadora).replace('{idProducto}', p.idProducto);
-            rowTemplate = rowTemplate.replace('{contador}', i + 1);
-            rowTemplate = rowTemplate.replace('{nombre}', p.nombre);
-            rowTemplate = rowTemplate.replace('{precio}', p.precio);
-            rowTemplate = rowTemplate.replace('{cantidad}', p.cantidad);
-            rowTemplate = rowTemplate.replace('{total}', p.total);
-            total = total + p.total;
-            gridProduct += rowTemplate;
-        });
-
-        var rowTotal = $('#trRowGridTicketTotal').html();
-        rowTotal = rowTotal.replace('{Total}', total);
-        gridProduct += rowTotal;
-
-        $('#tbListProducts').append(gridProduct);
-    }
 }
 
 /**
@@ -599,41 +702,6 @@ function getDesktopsActive() {
     });
 }
 
-/**
- * Obtener el ticket por el idComputadora
- */
-function getTicketByIdComputer() {
-    var ticket = {};
-    if (sessionStorage.getItem('tickets') !== null) {
-        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
-
-        ticket = Enumerable.from(tickets).where(w => w.idComputadora === _idComputadora && w.idRegistro === _idRegistro).firstOrDefault();
-        
-        return ticket;
-    }
-    return undefined;
-}
-
-/**
- * Borra el ticket correspondiente a la computadora seleccionada
- */
-function deleteTicketByIdComputer() {
-    if (sessionStorage.getItem('tickets') !== null) {
-        var tickets = JSON.parse(sessionStorage.getItem('tickets'));
-        tickets = $.grep(tickets, function (t) {
-            return t.idRegistro !== _idRegistro
-        });
-        
-        // borrar item de session storage
-        sessionStorage.removeItem('tickets');
-
-        // crear otro objeto en session storage con la informacion actualizada.
-        sessionStorage.setItem('tickets', JSON.stringify(tickets));
-
-        return true;
-    }
-    return false;
-}
 
 /**
  * Obtener el nombre de una computadora por id
@@ -748,23 +816,32 @@ ipcRenderer.on('record', (event, arg) => {
     var record = JSON.parse(arg);
     if (sessionStorage.getItem('desktopRecords') !== null) {
         records = JSON.parse(sessionStorage.getItem('desktopRecords'));
-        
+        // buscar registro en arreglo
         var findRecord = Enumerable.from(records).where(w => w.idRegistro === record.idRegistro).firstOrDefault();
 
+        // si no se encuentra el registro, se agrega un objeto
+        // nuevo al arreglo
         if (findRecord === null) {
             records.push(record);
         } else {
+            // si se encuentra el registro, eliminarlo
+            // para su reemplazo
             records = $.grep(records, function (r){
                 return r.idRegistro !== record.idRegistro;
             });
 
+            // reemplazando el registro, por el objeto actualizado
             records.push(record);
         }
-
-        sessionStorage.setItem('desktopRecords', JSON.stringify(records));
     } else {
+        // agregando el primer objeto del arregle
         records.push(record);
-        sessionStorage.setItem('desktopRecords', JSON.stringify(records));
     }
+
+    // guardando en el storage los registros de uso de las maquinas
+    sessionStorage.setItem('desktopRecords', JSON.stringify(records));
+
+    // obteniendo los tickets
+    getTicketsPending();
 });
 

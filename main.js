@@ -66,7 +66,7 @@ var Main = {
       slashes: true
     }));
 
-    mainWindow.setMenu(null);
+    // mainWindow.setMenu(null);
   
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
