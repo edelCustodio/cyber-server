@@ -4,10 +4,24 @@
 $(document).ready(function () {
     getProducts();
     setTimeout(() => {
-        fillComputerList();
-        fillDesktopDropdown();
-    }, 500);
+
+        getRecordsNoPay();
+        
+        setTimeout(() => {
+            // Obtener tickets pendientes por cobrar
+             getTicketsPending();
+             
+             setTimeout(() => {
+                fillComputerList();
+                fillDesktopDropdown();
+            }, 100);
+
+        }, 100);
+
+    }, 100);
     
+    // limpiar ticket
+    _idTicket = 0;
 });
 
 /**
@@ -76,31 +90,6 @@ function pagarTicket() {
 }
 
 /**
- * Crea un nuevo ticket para venta en mostrador
- */
-function crearNuevoTicket() {
-    cleanGridAndProductControls();
-    quitarSeleccionLista();
-
-    const usuario = JSON.parse(sessionStorage.getItem('userLoggedIn'));
-
-    let ticket = {
-        total: 0,
-        pago: 0,
-        cambio: 0,
-        idRegistro: 0,
-        idUsuario: usuario.idUsuario
-    }
-
-    // crear nuevo ticket
-    crearTicket(ticket);
-
-     // ejecutar metodo para recrear lista de tickets
-     actualizarListaTickets();
-}
-
-
-/**
  * cuando el switch de crear un nuevo ticket es seleccionado
  * necesitamos limpiar valores y crear un nuevo registro en
  * la tabla ticket de la base de datos
@@ -142,6 +131,16 @@ function obtenerTotalTicket() {
                                              .select(s2 => s2.cantidad).firstOrDefault())
             )
             .sum();
+
+    // Obtener la suma de los precios de productos especiales
+    // aquellos que en la base de datos no tiene precio fijo
+    // y que son establecidos a la hora del cobro de los mismos
+    const prod = Enumerable.from(productos).where(w => idProductos.indexOf(w.idProducto) > -1 && w.precio === 0).select(s => s.idProducto).toArray();
+
+    if (prod.length > 0) {
+        let totalProdEspeciales = Enumerable.from(ticket.ticketsDetalle).where(w => prod.indexOf(w.idProducto) > -1).sum(s => s.precio);
+        total = total + totalProdEspeciales;
+    }
 
     // Si existe idRegistro, entonces hay que agregar al total, totalPagar
     // del registro de uso de la maquina

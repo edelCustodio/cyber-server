@@ -10,6 +10,23 @@ const BrowserWindow = remote.BrowserWindow
 $(document).ready(function () {
     _arrClients = remote.getGlobal('clients');
     drawDesktops();
+    setTimeout(() => {
+        // obtener maquinas en uso en tiempo real
+        getDesktopsActive();
+        setTimeout(() => {
+            // obtener productos
+            getProducts();
+            setTimeout(() => {
+                // obtener registros de maquinas sin cobrar
+                getRecordsNoPay();
+                setTimeout(() => {
+                    // Obtener tickets pendientes por cobrar
+                    getTicketsPending();
+                }, 100);
+            }, 100);
+        }, 100);
+    }, 100);
+    
 });
 
 
@@ -253,7 +270,22 @@ $('#showAddProductModal').click(function () {
 //si existe, mostrarlos en el grid
 $('#sDesktops').change(function () {
     _idComputadora = parseInt($(this).val());
-    createGridProduct();
+    if (_idComputadora > 0) {
+        let ticket = null;
+        const records = JSON.parse(sessionStorage.getItem('desktopRecords'));
+        const rec = Enumerable.from(records).where(w => w.idComputadora === _idComputadora && w.fechaFin === null).firstOrDefault();
+        if (rec !== null) {
+            if (_tickets.length > 0) {
+                ticket = Enumerable.from(_tickets).where(w => w.idRegistro === rec.idRegistro).firstOrDefault();
+            }
+        }
+
+        if (ticket !== null) {
+            _idTicket = ticket.idTicket;
+            mostrarProductosEnGrid(ticket);
+        }
+        
+    }
 });
 
 

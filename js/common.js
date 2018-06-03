@@ -132,9 +132,6 @@ function drawDesktops() {
         $("#divComputadoras").append(allDesktops);
         
         sessionStorage.setItem('desktops', JSON.stringify(data));
-
-        // obtener maquinas en uso en tiempo real
-        getDesktopsActive();
     });
 }
 
@@ -152,39 +149,33 @@ $('#sProductos').change(function () {
         return;
     }
 
+    if(_idComputadora === 0 && location.href.includes('index.html')) {
+        //sweet alert
+        alertNotify('Ups!', 'Por favor, seleccione una computadora', 'warning');
+        //  chosen-default
+        $('.chosen-single').addClass('chosen-default');
+        $('.chosen-single span').html('Seleccione un producto...');
+        sProductos.val(0);
+    }
 
-    if(document.location.href.includes('index.html')) {
-        _idComputadora = $('#sDesktops').val() !== undefined ? parseInt($('#sDesktops').val()) : _idComputadora;
+    if (_idTicket > 0) {
+        var sProductos = $(this);
         $("#iCantidad").val('');
         $('#iTotal').val('');
+        var iPrecio = $('#iPrecio');
+        
+        // obtener producto
+        var producto = getProductSelected(parseInt(sProductos.val()));
 
-        if(_idComputadora > 0) {
-            var idProducto = parseInt(sProductos.val());
-            
-            var producto = getProductSelected(idProducto);
-            
-            //set precio
-            $('#iPrecio').val(producto.precio);
+        if(producto.precio === 0) {
+            iPrecio.removeAttr('disabled');
         } else {
-            //sweet alert
-            alertNotify('Ups!', 'Por favor, seleccione una computadora', 'warning');
-            //  chosen-default
-            $('.chosen-single').addClass('chosen-default');
-            $('.chosen-single span').html('Seleccione un producto...');
-            sProductos.val(0);
-
+            iPrecio.attr('disabled', true);
+            //set precio
+            iPrecio.val(producto.precio);
         }
     } else {
-        if (_idTicket > 0) {
-            var sProductos = $(this);
-            $("#iCantidad").val('');
-            $('#iTotal').val('');
-            
-            // obtener producto
-            var producto = getProductSelected(parseInt(sProductos.val()));
-            //set precio
-            $('#iPrecio').val(producto.precio);
-        } else {
+        if (location.href.includes('punto-venta.html')) {
             //sweet alert
             alertNotify('Ups!', 'Por favor, seleccione un ticket para poder agregar un producto.', 'warning');
             //  chosen-default
@@ -193,6 +184,7 @@ $('#sProductos').change(function () {
             sProductos.val(0);
         }
     }
+
 });
 
 /**
@@ -201,30 +193,49 @@ $('#sProductos').change(function () {
 $( "#iCantidad" ).keyup(function() {
 
     var idProducto = parseInt($('#sProductos').val());
+    var producto = getProductSelected(idProducto);
 
-    if (idProducto > 0) {
-        var cantidad = $("#iCantidad").val(); //get the value of input     
+    if (producto.precio > 0) {
+        if (idProducto > 0) {
+            var cantidad = $("#iCantidad").val(); //get the value of input     
 
-        if (cantidad !== "") {
-            var precio = $('#iPrecio').val();
-            var total = 0;
-            var producto = getProductSelected(idProducto);
-            
-            if (cantidad.match(/^\d+$/) && (parseInt(cantidad) <= producto.cantidad) && precio !== "") {    
-                total = parseInt(cantidad) * parseFloat(precio);
-                $('#iTotal').val(total);      
-            } else {
-                $("#iCantidad").val(producto.cantidad);
-                total = parseInt(cantidad) * parseFloat(precio);
-                $('#iTotal').val(total); 
-                alertNotify('Ups!', 'La cantidad debe de ser menor o igual que lo disponible.', 'warning');  
-            }
-            
+            if (cantidad !== "") {
+                var precio = $('#iPrecio').val();
+                var total = 0;
+                
+                if (cantidad.match(/^\d+$/) && (parseInt(cantidad) <= producto.cantidad) && precio !== "") {    
+                    total = parseInt(cantidad) * parseFloat(precio);
+                    $('#iTotal').val(total);      
+                } else {
+                    $("#iCantidad").val(producto.cantidad);
+                    total = parseInt(cantidad) * parseFloat(precio);
+                    $('#iTotal').val(total); 
+                    alertNotify('Ups!', 'La cantidad debe de ser menor o igual que lo disponible.', 'warning');  
+                }
+                
+                $('#btnAgregarProducto').removeAttr('disabled');
+            } else 
+                $('#btnAgregarProducto').attr('disabled', true);
+        } else {
+            alertNotify('Ups!', 'Por favor, seleccione un producto', 'warning');
+        }
+    }
+});
+
+$('#iPrecio').keyup(function() {
+    var precio = parseFloat($(this).val());
+    var idProducto = parseInt($('#sProductos').val());
+    var producto = getProductSelected(idProducto);
+    var cantidad = $("#iCantidad").val();
+
+    if (producto.precio === 0) {
+        if (precio > 0) {
+            var total = parseInt(cantidad) * parseFloat(precio);
+            $('#iTotal').val(total);
             $('#btnAgregarProducto').removeAttr('disabled');
-        } else 
+        } else {
             $('#btnAgregarProducto').attr('disabled', true);
-    } else {
-        alertNotify('Ups!', 'Por favor, seleccione un producto', 'warning');
+        }
     }
 });
 
@@ -269,13 +280,6 @@ function getProducts() {
             });
         }
     
-        // Obtener tickets pendientes por cobrar
-        getTicketsPending();
-
-        setTimeout(() => {
-            getRecordsNoPay();
-        }, 500);
-
         $('.chosen-single').css('text-transform', 'none');
     });
 
@@ -390,11 +394,14 @@ function addProductToTicket() {
 
     // Insertar nuevo registro
     if (found === null) {
+        var producto = getProductSelected(idProducto);
+
         // detalle del ticket
         var ticketDetalle = {
             idTicket: ticket.idTicket,
             idProducto: idProducto,
-            cantidad: cantidad
+            cantidad: cantidad,
+            precio: producto.precio === 0 ? precio : null
         }
 
         // insertar registro del detalle del ticket
@@ -482,17 +489,33 @@ function mostrarProductosEnGrid(ticket) {
                         tieneRentaEquipo = true;
                         idTicketDetalle = d.idTicketDetalle;
                     } else {
+                        if(producto.precio === 0) {
+                            total = d.precio * d.cantidad;
+                            rowTemplate = rowTemplate.replace('{precio}', d.precio);
+                        } else {
+                            total = producto.precio * d.cantidad;
+                            rowTemplate = rowTemplate.replace('{precio}', producto.precio);
+                        }
+                    }
+                } else {
+                    if(producto.precio === 0) {
+                        total = d.precio * d.cantidad;
+                        rowTemplate = rowTemplate.replace('{precio}', d.precio);
+                    } else {
                         total = producto.precio * d.cantidad;
                         rowTemplate = rowTemplate.replace('{precio}', producto.precio);
                     }
+                }
+            } else {
+                if(producto.precio === 0) {
+                    total = d.precio * d.cantidad;
+                    rowTemplate = rowTemplate.replace('{precio}', d.precio);
                 } else {
                     total = producto.precio * d.cantidad;
                     rowTemplate = rowTemplate.replace('{precio}', producto.precio);
                 }
-            } else {
-                total = producto.precio * d.cantidad;
-                rowTemplate = rowTemplate.replace('{precio}', producto.precio);
             }
+
             rowTemplate = rowTemplate.replace('{idTicketDetalle}', d.idTicketDetalle);
             rowTemplate = rowTemplate.replace('{contador}', i + 1);
             rowTemplate = rowTemplate.replace('{nombre}', producto.nombre);
@@ -522,9 +545,9 @@ function mostrarProductosEnGrid(ticket) {
  */
 function fillComputerList() {
     var computerList = $('#computerList');
-    const desktops = JSON.parse(sessionStorage.getItem('desktops'));
+    
     computerList.empty();
-    $.each(_tickets, function (i, tick) {
+    $.each(Enumerable.from(_tickets).orderByDescending(o => new Date(o.fecha)).toArray(), function (i, tick) {
         var itemComputerListTemplate = $('#itemComputerList').html();
         itemComputerListTemplate = itemComputerListTemplate.replace('{idTicket}', tick.idTicket);
         itemComputerListTemplate = itemComputerListTemplate.replace('{idTicket}', tick.idTicket);
@@ -586,8 +609,8 @@ function insertTicketDetalle(ticketDetalle) {
  * Insertar detalle del ticket
  * @param {*} ticketDetalle objeto del registro que sera insertado
  */
-function actualizarTicketDetalle(idTicketDetalle, cantidad) {
-    $.post(apiURL + '/api/updateTicketDetalle', { idTicketDetalle: idTicketDetalle, cantidad: cantidad }, function(data) {
+function actualizarTicketDetalle(idTicketDetalle, cantidad, precio = null) {
+    $.post(apiURL + '/api/updateTicketDetalle', { idTicketDetalle: idTicketDetalle, cantidad: cantidad, precio: precio }, function(data) {
         if (data.result) {
             getTicketsPending(true);
         }
@@ -640,8 +663,43 @@ function eliminarTicket(idTicket) {
  * @param {array} ticketDetalle objeto del registro que sera insertado
  */
 function buildTicketDetailInsert(ticketDetalle) {
-    return `INSERT INTO Entidad.TicketDetalle (idTicket, idProducto, cantidad) 
-                    VALUES (` + ticketDetalle.idTicket + `, ` + ticketDetalle.idProducto + `, ` + ticketDetalle.cantidad + `)`;
+    if (ticketDetalle.precio === null) {
+        return `INSERT INTO Entidad.TicketDetalle (idTicket, idProducto, cantidad) 
+                        VALUES (` + ticketDetalle.idTicket + `, ` + ticketDetalle.idProducto + `, ` + ticketDetalle.cantidad + `)`;
+    } else {
+        return `INSERT INTO Entidad.TicketDetalle (idTicket, idProducto, cantidad, precio) 
+                        VALUES (` + ticketDetalle.idTicket + `, ` + ticketDetalle.idProducto + `, ` + ticketDetalle.cantidad + `, ` + ticketDetalle.precio + `)`;
+    }
+}
+
+
+/**
+ * Crea un nuevo ticket para venta en mostrador
+ */
+function crearNuevoTicket(idRegistro = 0, limpiarGrid = true) {
+    if (limpiarGrid) {
+        cleanGridAndProductControls();
+    }    
+    
+    const usuario = JSON.parse(sessionStorage.getItem('userLoggedIn'));
+
+    let ticket = {
+        total: 0,
+        pago: 0,
+        cambio: 0,
+        idRegistro: idRegistro,
+        idUsuario: usuario.idUsuario
+    }
+
+    // crear nuevo ticket
+    crearTicket(ticket);
+
+    // Actualizar/limpiar valores
+    if (location.href.includes('punto-venta.html')) {
+        quitarSeleccionLista();
+        // ejecutar metodo para recrear lista de tickets
+        actualizarListaTickets();
+    }     
 }
 
 /**
@@ -697,8 +755,7 @@ function getDesktopsActive() {
             })
 
             sessionStorage.setItem('destopInUse', JSON.stringify(data));
-        }        
-        getProducts();
+        }
     });
 }
 
@@ -838,10 +895,15 @@ ipcRenderer.on('record', (event, arg) => {
         records.push(record);
     }
 
+    getRecordsNoPay();
+
+    // Crear nuevo ticket en base al registro nuevo
+    // de uso de la maquina
+    if (record.fechaFin === null) {
+        crearNuevoTicket(record.idRegistro, false);
+    }
+
     // guardando en el storage los registros de uso de las maquinas
     sessionStorage.setItem('desktopRecords', JSON.stringify(records));
-
-    // obteniendo los tickets
-    getTicketsPending();
 });
 
