@@ -22,7 +22,7 @@ $(document).ready(function () {
                 setTimeout(() => {
                     // Obtener tickets pendientes por cobrar
                     getTicketsPending();
-                }, 100);
+                }, 200);
             }, 100);
         }, 100);
     }, 100);
@@ -211,10 +211,13 @@ function startDesktop() {
         start = true;
     }
 
+    const usuario = JSON.parse(sessionStorage.getItem('userLoggedIn'));
+
     var message = {
         start: start,
         countDown: countDown,
-        minutes: minutes
+        minutes: minutes,
+        idUsuario: usuario.idUsuario 
     }
 
     if (!$.isEmptyObject(client))

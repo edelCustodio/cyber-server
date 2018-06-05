@@ -3,6 +3,7 @@ const ip = require('ip');
 const main = require('../../main');
 const desktopNames = [];
 const desktopsArray = [];
+const { ipcMain } = require('electron')
 
 global.clients = [];
 
@@ -22,16 +23,24 @@ var CyberControl = {
             };
             
             if (clients.length > 0) {
-                for (var i = 0; i < clients.length; i++) {
-                    const remoteAddress = clients[i].sock.remoteAddress;
-                    if (remoteAddress.includes(client.sock.remoteAddress)) {
-                        clients[i] = client;
-                        console.log('I just to update the client list for '+ client.sock.remoteAddress);
-                    }else{
-                        clients.push(client);
-                    }
+                // buscar maquina conectada
+                const cli = clients.filter(w => w.sock.remoteAddress === client.sock.remoteAddress)[0];
+                // si no se encontro la maquina en el arreglo
+                // agregarla
+                if (cli === undefined) {
+                    clients.push(client);
+                } else {
+                    // si se encontro la maquina, actualizar el socket
+                    clients.forEach((c, i) => {
+                        const remoteAddress = c.sock.remoteAddress;
+                        if (remoteAddress.includes(client.sock.remoteAddress)) {
+                            clients[i] = client;
+                            console.log('I just to update the client list for '+ client.sock.remoteAddress);
+                        }
+                    });
                 }
             } else {
+                // agregar la primera maquina
                 clients.push(client);
             }
         
@@ -39,46 +48,13 @@ var CyberControl = {
             // We have a connection - a socket object is assigned to the connection automatically
             console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
             
+            
             // Add a 'data' event handler to this instance of socket
             sock.on('data', function(data) {
                 
                 var textData = data.toString('utf8');
                 var jsonData = null;
-                
-                try {
-                    jsonData = JSON.parse(textData);
-                }catch (e) {
-                    const arrStr = textData.split('}');
-                    arrStr.forEach(str => {
-                        if(str.length > 0) {
-                            str = str + '}';
-                            const j = JSON.parse(str);
-                            if(j.hostname !== undefined) {
-                                if (desktopNames.length === 0) {
-                                    desktopNames.push(j.hostname);
-                                    desktopsArray.push(j);
-                                } else {
-                                    const name = desktopNames.filter(w => w === j.hostname)[0];
-                                    if(name.length === 0) {
-                                        desktopNames.push(j.hostname);
-                                        desktopsArray.push(j);
-                                    }
-                                }
-    
-                                if (clients.length > 0) {
-                                    clients.forEach(c => {
-                                        const remoteAddress = c.sock.remoteAddress;
-                                        if(remoteAddress.includes(j.IP)) {
-                                            client.data = j;
-                                            c = client;
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    });
-                }
-                
+                jsonData = JSON.parse(textData);                
 
                 if (jsonData !== null && jsonData.IP !== undefined) {
                     for(var i = 0; i < clients.length; i++) {
@@ -87,6 +63,7 @@ var CyberControl = {
                             clients[i].data = jsonData;
                         }
                     }
+                    main.getMainWindow().webContents.send('clientConnected', JSON.stringify({ connected: true }));
                 } else if (jsonData !== null && jsonData.stopBy !== undefined) {
                     main.getMainWindow().webContents.send('time-off', jsonData.client);
                 } else if (jsonData !== null && jsonData.idRegistro !== undefined) {
@@ -146,5 +123,14 @@ var CyberControl = {
         return ipAddress;
     }
 }
+
+// Listen for async-reply message from main process
+ipcMain.on('getSockets', (event, arg) => {  
+    // Print 2
+    // console.log(arg);
+    // var ips = { ipServer: configuration.readSettings('IPServer') };
+    // Send sync message to main process
+    event.sender.send('sockets', clients);
+  });
 
 module.exports = CyberControl;

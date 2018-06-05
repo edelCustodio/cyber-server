@@ -6,22 +6,23 @@ const os = require('os');
 const { autoUpdater } = require('electron-updater')
 const isDev = require('electron-is-dev')
 const log = require('electron-log');
-const thermal_printer = require("node-thermal-printer");
-const printer = require("printer");
-const util = require('util');
+const AutoLaunch = require('auto-launch');
+// const thermal_printer = require("node-thermal-printer");
+// const printer = require("printer");
+// const util = require('util');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 log.info('App starting...');
 
 // obtener impresora termica
-var ecline = printer.getPrinter('EC-PM-5890X');
+// var ecline = printer.getPrinter('EC-PM-5890X');
 
-// configuracion inicial para la impresora
-thermal_printer.init({
-  type: 'epson'
-});
-thermal_printer.alignCenter();
+// // configuracion inicial para la impresora
+// thermal_printer.init({
+//   type: 'epson'
+// });
+// thermal_printer.alignCenter();
 
 // Module to control application life.
 const app = electron.app
@@ -89,6 +90,18 @@ var Main = {
     if(!configuration.existInvoiceFolder()) {
       configuration.createInvoiceFolder();
     }
+
+    // Ejecutar la aplicacion cada vez que el SO inicie
+    let autoLaunch = new AutoLaunch({
+      name: 'cyber-server',
+      path: app.getPath('exe'),
+    });
+
+    autoLaunch.isEnabled().then((isEnabled) => {
+      if (!isEnabled) {
+        autoLaunch.enable();
+      }
+    });
   },
 
   getMainWindow: function () {

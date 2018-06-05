@@ -84,7 +84,7 @@ function pagarTicket() {
     $.post(apiURL + '/api/payTicket', ticket, function (data) {
         if (data.result) {
             sessionStorage.setItem('idTicket', _idTicket);
-            location.href = 'invoice.html';
+            // location.href = 'invoice.html';
         }
     });
 }

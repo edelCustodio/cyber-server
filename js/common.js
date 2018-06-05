@@ -113,14 +113,16 @@ ipcRenderer.on('getForIPServer', (event, arg) => {
  */
 function drawDesktops() {
     var allDesktops = "";
-    
+    // _arrClients = remote.getGlobal('clients');
+
     $.get(apiURL + "/api/getComputers", function(data) {
         // recorrer las maquinas que estan en linea en base de datos
-        $(data).each(function(i, pc) {
+        const maquinasOrdenadas = Enumerable.from(data).orderBy(o => o.nombre).toArray(); 
+        $(maquinasOrdenadas).each(function(i, pc) {
             // comparar contra las maquinas que realmente tienen comunicacion
             // con la maquina de cobro
             _arrClients.forEach(cl => {
-                if (cl.data.hostname === pc.nombre) {
+                if (cl.data.hostname.includes(pc.nombre)) {
                     var template = $("#computadora-tmp").html();
                     template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
                     allDesktops += template;
@@ -848,6 +850,7 @@ ipcRenderer.on('clientClosed', (event, arg) => {
                 var data = { idComputadora: desktop.idComputadora, enLinea: false };
                 $.post(apiURL + '/api/setDesktopOnline', data, function(response) {
                     if (response.result) {
+                        
                         // eliminar del arreglo de sockets la maquina desconectada
                         _arrClients = $.grep(_arrClients, function(r) {
                             return !ipClient.includes(r.data.IP);
@@ -855,14 +858,37 @@ ipcRenderer.on('clientClosed', (event, arg) => {
 
                         // si la aplicacion esta en el index, este se actualizara
                         // automaticamente
-                        if (document.location.href.includes('index.html')) {
-                            document.location.reload();
-                        }
+                        mostrarComputadorasDisponibles();
                     }
                 });
             }
         }
     });
+});
+
+function mostrarComputadorasDisponibles() {
+    if (document.location.href.includes('index.html')) {
+        setTimeout(() => {
+            drawDesktops();
+        }, 200);
+    }
+}
+
+/**
+ * Una vez que una maquina sea conectada, necesitamos mostrala
+ * en el panel de control de las maquinas
+ */
+ipcRenderer.on('clientConnected', (event, arg) => {
+    var cli = JSON.parse(arg);
+    if(cli.connected) {
+        ipcRenderer.send('getSockets', 1);
+        
+    }
+});
+
+ipcRenderer.on('sockets', (event, arg) => {  
+    _arrClients = arg
+    mostrarComputadorasDisponibles();
 });
 
 /**
@@ -897,10 +923,13 @@ ipcRenderer.on('record', (event, arg) => {
 
     getRecordsNoPay();
 
-    // Crear nuevo ticket en base al registro nuevo
-    // de uso de la maquina
+    // // Crear nuevo ticket en base al registro nuevo
+    // // de uso de la maquina
     if (record.fechaFin === null) {
-        crearNuevoTicket(record.idRegistro, false);
+        // crearNuevoTicket(record.idRegistro, false);
+        // setTimeout(() => {
+        //     drawDesktops();
+        // }, 100);
     }
 
     // guardando en el storage los registros de uso de las maquinas
