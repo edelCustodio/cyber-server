@@ -8,25 +8,9 @@ const BrowserWindow = remote.BrowserWindow
 
 //document ready
 $(document).ready(function () {
-    _arrClients = remote.getGlobal('clients');
-    drawDesktops();
-    setTimeout(() => {
-        // obtener maquinas en uso en tiempo real
-        getDesktopsActive();
-        setTimeout(() => {
-            // obtener productos
-            getProducts();
-            setTimeout(() => {
-                // obtener registros de maquinas sin cobrar
-                getRecordsNoPay();
-                setTimeout(() => {
-                    // Obtener tickets pendientes por cobrar
-                    getTicketsPending();
-                }, 200);
-            }, 100);
-        }, 100);
-    }, 100);
-    
+    getProducts();
+    getTicketsPending();
+    getDesktopsAvailables();
 });
 
 
@@ -70,7 +54,8 @@ $(window).load(function () {
 /**
  * Event to turn on/off the desktop
  */
-$(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar").on("click", ".contacts input[type='checkbox'], a.ci-avatar", function () {
+$(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar")
+    .on("click", ".contacts input[type='checkbox'], a.ci-avatar", function () {
     var $this = $(this);
     _checkedObj = {};
     _checkedObj = getCheckboxDesktop($this)
@@ -91,11 +76,6 @@ $(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar").on("cl
 
         _input.prop("checked", false);
         changeColorDesktopIcon();
-
-        //Guardar informacion de la maquina para su posterior cobro
-        var desktops = JSON.parse(sessionStorage.getItem('desktops'));
-        var desktop = Enumerable.from(desktops).where(w => w.nombre === getDesktopNameSelected()).firstOrDefault();
-        saveDesktopToPurchase(desktop);
     }
 });
 
@@ -188,6 +168,31 @@ function changeColorDesktopIcon() {
 }
 
 /**
+ * Poner en color verde las computadoras que estan siendo usadas
+ * con respecto a los registros no pagados de las maquinas y que
+ * la fecha de fin sea nula
+ */
+function setGreenDesktopsUsed() {
+    if(_recordsNoPay && _recordsNoPay.length > 0) {
+        _recordsNoPay.forEach(d => {
+            if (d.fechaFin === null) {
+                _input = $('#stCompu-'+ d.idComputadora);
+                _input.prop("checked", true);
+                changeColorDesktopIcon();
+                const desktop = getDesktopInfoByIdFromStorage(d.idComputadora);
+                if (desktop !== null && desktop !== undefined) {
+                    var client = getClient(desktop.nombre);
+                    if (!$.isEmptyObject(client)) {
+                        var j = { init: true, record: d };
+                        client.sock.write(JSON.stringify(j));
+                    }
+                }                    
+            }
+        });
+    }
+}
+
+/**
  * Iniciar o detener el reloj contador para la computadora seleccionada
  */
 function startDesktop() {
@@ -212,12 +217,14 @@ function startDesktop() {
     }
 
     const usuario = JSON.parse(sessionStorage.getItem('userLoggedIn'));
+    const jwt = parseJwt(sessionStorage.token);
+    const idUsuario = parseInt(jwt.nameid);
 
     var message = {
         start: start,
         countDown: countDown,
         minutes: minutes,
-        idUsuario: usuario.idUsuario 
+        idUsuario: idUsuario 
     }
 
     if (!$.isEmptyObject(client))
@@ -232,6 +239,9 @@ function getDesktopClient() {
     return getClient(getDesktopNameSelected());
 }
 
+/**
+ * Obtener el nombre de la computadora seleccionada
+ */
 function getDesktopNameSelected() {
     var idComputadora = parseInt(_input.attr('id').split('-')[1]);
     var desktops = JSON.parse(sessionStorage.getItem('desktops'));
@@ -239,35 +249,40 @@ function getDesktopNameSelected() {
     return hostname;
 }
 
-/**
- * Devuelve el cliente Socket de una maquina logueada en el servidor
- * @param {*} hostname Nombre de la maquina 
- */
-function getClient(hostname) {
-    var client = {};
-    // buscar maquina
-    for (var i = 0; i < _arrClients.length; i++) {
-        if (_arrClients[i].data.hostname === hostname) {
-            client = _arrClients[i];
-        }
-    }
-    // regresa socket de la maquina se esta buscando
-    return client;
-}
+
 
 //show add product modal and fill out the fields
 $('#showAddProductModal').click(function () {
-    var records = sessionStorage.getItem('desktopRecords') !== null ? JSON.parse(sessionStorage.getItem('desktopRecords')) : [];
-    if(records.length > 0) {
+    const records = getDesktopRecords();
+    const isUsed = validateDesktopInUse(records);
+    if(records && records.length > 0 && isUsed) {
         // populate desktop dropdown
         fillDesktopDropdown();
         //show modal
         $('#addTicketItem').modal('show');
     } else {
         notify('top', 'right', 'fa fa-comments', 'warning', 'Agregar productos, ', 'solo se puede agregar productos a computadoras en uso');
-        // notify('top', 'right', 'fa fa-comments', 'warning', 'Agregar productos, ', 'para agregar algun producto a una computadora activa\n necesita no tener pagos pendientes del ultimo uso de esa computadora.');
     }
 });
+
+/**
+ * Validar si hay por lo menos un solo registro que indique
+ * que una computadora esta en uso
+ * @param {*} records registros del uso de las computadoras
+ */
+function validateDesktopInUse(records) {
+    let isUsed = false;
+    if (records.length > 0) {
+        records.forEach(r => {
+            if (r.fechaFin === null) {
+                isUsed = true;
+                return false;
+            }
+        });
+    }
+
+    return isUsed;
+}
 
 //Seleccionar computadora, comprobar si existen productos asociados a la computadora seleccionada
 //si existe, mostrarlos en el grid
@@ -300,18 +315,11 @@ $('#btnCerrar').click(function () {
 });
 
 /**
- * Guardar la informacion de la maquina para su posterior cobro
- * @param {*Object} desktop objeto de la maquina a cobrar
+ * Obtiene las computadoras disponibles
  */
-function saveDesktopToPurchase(desktop) {
-    if (sessionStorage.getItem('desktopsToPurchase') !== null) {
-        var desktopToPurchase = JSON.parse(sessionStorage.getItem('desktopsToPurchase'));
-        var findDesktop = Enumerable.from(desktopToPurchase).where(w => w.nombre === desktop.nombre).firstOrDefault();
-        if (findDesktop === undefined) {
-            desktopToPurchase.push(desktop);
-            sessionStorage.setItem('desktopsToPurchase', JSON.stringify(desktopToPurchase));
-        }
-    } else {
-        sessionStorage.setItem('desktopsToPurchase', JSON.stringify([desktop]));
-    }
+function getDesktopsAvailables() {
+    ajaxHelper.get(apiURL + '/api/Desktop/getComputers', function (data, textStatus, jqXHR){
+        drawDesktops(data);
+        getRecordsNoPay(setGreenDesktopsUsed);
+    }, errorAjaxHandler);
 }

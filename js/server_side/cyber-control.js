@@ -63,14 +63,18 @@ var CyberControl = {
                             clients[i].data = jsonData;
                         }
                     }
-                    main.getMainWindow().webContents.send('clientConnected', JSON.stringify({ connected: true }));
-                } else if (jsonData !== null && jsonData.stopBy !== undefined) {
-                    main.getMainWindow().webContents.send('time-off', jsonData.client);
-                } else if (jsonData !== null && jsonData.idRegistro !== undefined) {
-                    main.getMainWindow().webContents.send('record', textData);
+                    main.getMainWindow().webContents.send('clientConnected', JSON.stringify({ connected: true, hostname: jsonData.hostname }));
+                } else if (jsonData !== null && jsonData.idComputadora !== undefined && jsonData.timeOff === undefined) {
+                    main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
+                } else if (jsonData !== null && jsonData.timeOff !== undefined) {
+                    main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
+                    main.getMainWindow().webContents.send('time-off', jsonData.timeOff.client);
                 } else if (jsonData !== null && jsonData.closeApp) {
                     main.getMainWindow().webContents.send('clientClosed', jsonData.hostname);
+                } else if (jsonData !== null && jsonData.requestDesktopInfo) {
+                    main.getMainWindow().webContents.send('requestDesktopInfo', jsonData.client);
                 }
+
             });
           
             // Add a 'close' event handler to this instance of socket
@@ -125,12 +129,9 @@ var CyberControl = {
 }
 
 // Listen for async-reply message from main process
-ipcMain.on('getSockets', (event, arg) => {  
-    // Print 2
-    // console.log(arg);
-    // var ips = { ipServer: configuration.readSettings('IPServer') };
+ipcMain.on('getSockets', (event, arg) => { 
     // Send sync message to main process
-    event.sender.send('sockets', clients);
+    event.sender.send('sockets', { clients: clients, desktopInfo: arg });
   });
 
 module.exports = CyberControl;

@@ -2,24 +2,10 @@
 
 
 $(document).ready(function () {
+    getRecordsNoPay();
     getProducts();
-    setTimeout(() => {
-
-        getRecordsNoPay();
-        
-        setTimeout(() => {
-            // Obtener tickets pendientes por cobrar
-             getTicketsPending();
-             
-             setTimeout(() => {
-                fillComputerList();
-                fillDesktopDropdown();
-            }, 100);
-
-        }, 100);
-
-    }, 100);
-    
+    getTicketsPending(false, true);
+    fillDesktopDropdown();
     // limpiar ticket
     _idTicket = 0;
 });
@@ -81,12 +67,13 @@ function pagarTicket() {
         cambio: cambio
     }
 
-    $.post(apiURL + '/api/payTicket', ticket, function (data) {
-        if (data.result) {
+    ajaxHelper.post(apiURL + 'api/Ticket/payTicket', ticket, function (data) {
+        if (data) {
             sessionStorage.setItem('idTicket', _idTicket);
             // location.href = 'invoice.html';
+            location.reload();
         }
-    });
+    }, errorAjaxHandler);
 }
 
 /**
@@ -123,10 +110,10 @@ function obtenerTotalTicket() {
     const productos = JSON.parse(sessionStorage.getItem('products'));
     
 
-    const idProductos = Enumerable.from(ticket.ticketsDetalle).where(w => w.idProducto !== 1360).select(s => s.idProducto).toArray();
+    const idProductos = Enumerable.from(ticket.Detalle).where(w => w.idProducto !== 1360).select(s => s.idProducto).toArray();
     total = Enumerable.from(productos).where(w => idProductos.indexOf(w.idProducto) > -1)
             .select(s => 
-                    (s.precio * Enumerable.from(ticket.ticketsDetalle)
+                    (s.precio * Enumerable.from(ticket.Detalle)
                                              .where(w => w.idProducto === s.idProducto)
                                              .select(s2 => s2.cantidad).firstOrDefault())
             )
@@ -138,7 +125,7 @@ function obtenerTotalTicket() {
     const prod = Enumerable.from(productos).where(w => idProductos.indexOf(w.idProducto) > -1 && w.precio === 0).select(s => s.idProducto).toArray();
 
     if (prod.length > 0) {
-        let totalProdEspeciales = Enumerable.from(ticket.ticketsDetalle).where(w => prod.indexOf(w.idProducto) > -1).sum(s => s.precio);
+        let totalProdEspeciales = Enumerable.from(ticket.Detalle).where(w => prod.indexOf(w.idProducto) > -1).sum(s => s.precio);
         total = total + totalProdEspeciales;
     }
 
@@ -158,10 +145,20 @@ function obtenerTotalTicket() {
 $(document).off('click', 'button[id^="eliminar"]').on('click', 'button[id^="eliminar"]', function () {
     var btn = $(this);
     var idTicket = parseInt(btn.attr('id').split('-')[1]);
+    var ticket = Enumerable.from(_tickets).where(w => w.idTicket === idTicket).firstOrDefault();
+    let isUsed = false;
+    let texto = 'Desea eliminar el ticket?';
+
+    if (ticket.idRegistro !== null) {
+        const record = getDesktopRecordById(ticket.idRegistro);
+        if (record && record.fechaFin === null) {
+            texto += ' Este ticket esta asociado a una maquina en uso actualmente.';
+        }
+    }    
 
     swal({
         title: 'Eliminar ticket',
-        text: 'Desea eliminar el ticket?',
+        text: texto,
         type: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -170,9 +167,7 @@ $(document).off('click', 'button[id^="eliminar"]').on('click', 'button[id^="elim
     }).then((result) => {
         if (result.value) {
             eliminarTicket(idTicket);
-
-            // ejecutar metodo para recrear lista de tickets
-            actualizarListaTickets();
+            cleanGridAndProductControls();
         }
     });
 

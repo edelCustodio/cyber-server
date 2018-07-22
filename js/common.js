@@ -14,6 +14,7 @@ var _tickets = [];
 var _ticket = {};
 var _recordsNoPay = [];
 var _idTicket = 0;
+var port = 8080; // 7070
 
 
 /*--------------------------------------
@@ -92,10 +93,12 @@ function alertExecuteFunction(title, text, type, functionHandle) {
 $(document).ready(function () {
     
     if (sessionStorage.getItem('IPServer') !== null) {
-        apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':7070';
+        apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':' + port + '/';
+        // apiURL = 'http://localhost:' + port + '/';
     } else {
         ipcRenderer.send('goForIPServer', 1);
     }
+    _arrClients = remote.getGlobal('clients');
 });
 
 /**
@@ -104,37 +107,49 @@ $(document).ready(function () {
 ipcRenderer.on('getForIPServer', (event, arg) => {  
     var ips = JSON.parse(arg);
     sessionStorage.setItem('IPServer', ips.ipServer);
-    apiURL = 'http://' + ips.ipServer + ':7070';
+     apiURL = 'http://' + ips.ipServer + ':' + port + '/';
+    // apiURL = 'http://localhost:' + port + '/';
     sessionStorage.setItem('IPServer', ips.ipServer);
 });
 
 /**
  * Mostrar las computadoras activas
  */
-function drawDesktops() {
-    var allDesktops = "";
-    // _arrClients = remote.getGlobal('clients');
+function drawDesktops(desktops) {
+    
+    _arrClients = remote.getGlobal('clients');
 
-    $.get(apiURL + "/api/getComputers", function(data) {
-        // recorrer las maquinas que estan en linea en base de datos
-        const maquinasOrdenadas = Enumerable.from(data).orderBy(o => o.nombre).toArray(); 
-        $(maquinasOrdenadas).each(function(i, pc) {
-            // comparar contra las maquinas que realmente tienen comunicacion
-            // con la maquina de cobro
+    if (desktops.length === 0 && _arrClients.length > 0) {
+        _arrClients.forEach(cl => {
+            getDesktopByName(cl.data.hostname);
+        });
+    } else {
+        showDesktops(desktops);
+    }    
+}
+
+function showDesktops(desktops) {
+    var allDesktops = "";
+    // recorrer las maquinas que estan en linea en base de datos
+    const maquinasOrdenadas = Enumerable.from(desktops).orderBy(o => o.nombre).toArray(); 
+    $("#divComputadoras").empty();
+
+    maquinasOrdenadas.forEach(pc => {
+        // comparar contra las maquinas que realmente tienen comunicacion
+        // con la maquina de cobro
+        if (_arrClients && _arrClients.length > 0) {
             _arrClients.forEach(cl => {
                 if (cl.data.hostname.includes(pc.nombre)) {
                     var template = $("#computadora-tmp").html();
                     template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
-                    allDesktops += template;
+                    // allDesktops += template;
+                    $("#divComputadoras").append(template);
                 }
             });
-        });
-
-        $("#divComputadoras").empty();
-        $("#divComputadoras").append(allDesktops);
-        
-        sessionStorage.setItem('desktops', JSON.stringify(data));
+        }
     });
+
+    sessionStorage.setItem('desktops', JSON.stringify(desktops));
 }
 
 /**
@@ -160,7 +175,7 @@ $('#sProductos').change(function () {
         sProductos.val(0);
     }
 
-    if (_idTicket > 0) {
+    if (_idTicket > 0 || location.href.includes('index.html')) {
         var sProductos = $(this);
         $("#iCantidad").val('');
         $('#iTotal').val('');
@@ -199,31 +214,34 @@ $( "#iCantidad" ).keyup(function() {
 
     if (producto.precio > 0) {
         if (idProducto > 0) {
-            var cantidad = $("#iCantidad").val(); //get the value of input     
+            var cantidad = parseInt($("#iCantidad").val()); //get the value of input
 
-            if (cantidad !== "") {
-                var precio = $('#iPrecio').val();
+            if (cantidad > 0) {
+                var precio = parseFloat($('#iPrecio').val());
                 var total = 0;
                 
-                if (cantidad.match(/^\d+$/) && (parseInt(cantidad) <= producto.cantidad) && precio !== "") {    
-                    total = parseInt(cantidad) * parseFloat(precio);
+                if (cantidad <= producto.cantidad) {    
+                    total = cantidad * precio;
                     $('#iTotal').val(total);      
                 } else {
-                    $("#iCantidad").val(producto.cantidad);
-                    total = parseInt(cantidad) * parseFloat(precio);
-                    $('#iTotal').val(total); 
                     alertNotify('Ups!', 'La cantidad debe de ser menor o igual que lo disponible.', 'warning');  
                 }
                 
                 $('#btnAgregarProducto').removeAttr('disabled');
-            } else 
+            } else {
                 $('#btnAgregarProducto').attr('disabled', true);
+            }
         } else {
             alertNotify('Ups!', 'Por favor, seleccione un producto', 'warning');
         }
     }
 });
 
+/**
+ * Existen productos que se les puede agregar el precio
+ * a criterio del usuario, y aqui se hace el calculo del
+ * total
+ */
 $('#iPrecio').keyup(function() {
     var precio = parseFloat($(this).val());
     var idProducto = parseInt($('#sProductos').val());
@@ -260,8 +278,10 @@ function getProducts() {
     var $sProducts = $('#sProductos');
     $sProducts.empty();
 
+    // var getProductsURL = apiURL + "/api/getProducts";
+    var getProductsURL = apiURL + "/api/Product/getProducts";
      //get products
-     $.get(apiURL + "/api/getProducts", function(data) {
+     ajaxHelper.get(getProductsURL, function(data) {
         var products = data;
         $sProducts.append($("<option />").val(0).text('Seleccione un producto...'));
         $.each(products, function() {
@@ -269,12 +289,7 @@ function getProducts() {
                 $sProducts.append($("<option />").val(this.idProducto).text(this.nombre));
         });
 
-        if (sessionStorage.getItem('products') === null)
-            sessionStorage.setItem('products', JSON.stringify(products));
-        else {
-            sessionStorage.removeItem('products');
-            sessionStorage.setItem('products', JSON.stringify(products));
-        }
+        sessionStorage.setItem('products', JSON.stringify(products));
 
         if($('.chosen')[0]) {
             $('.chosen').chosen({
@@ -283,7 +298,7 @@ function getProducts() {
         }
     
         $('.chosen-single').css('text-transform', 'none');
-    });
+    }, errorAjaxHandler);
 
     
 }
@@ -291,29 +306,39 @@ function getProducts() {
 /**
  * Obtener los tickets pendientes por pagar
  */
-function getTicketsPending(showGrid = false) {
-     $.get(apiURL + "/api/getTicketsPending", function(response) {
-        if (response.result) {
-            _tickets = response.data;
+function getTicketsPending(showGrid = false, showList = false) {
+    var ticketsPendingURL = apiURL + "api/Ticket/getTicketsPending";
+     ajaxHelper.get(ticketsPendingURL, function (response) {
+        if (response) {
+            _tickets = response;
 
-            if(showGrid) {
+            if (showGrid) {
                 const ticket = Enumerable.from(_tickets).where(w => w.idTicket === _idTicket).firstOrDefault();
                 mostrarProductosEnGrid(ticket);
-                // createGridProduct();
+            }
+
+            if (showList && location.href.includes('punto-venta.html')) {
+                fillComputerList();
             }
         }
-    });
+    }, errorAjaxHandler);
 }
 
 /**
  * Obtener los tickets pendientes por pagar
  */
-function getRecordsNoPay() {
-    $.get(apiURL + "/api/getRecordsNoPay", function(response) {
-        if (response.result) {
-            _recordsNoPay = response.data;
+function getRecordsNoPay(callbackAfterResponse = undefined) {
+    // var recordsNoPaid = apiURL + "/api/getRecordsNoPay";
+    var recordsNoPaid = apiURL + "api/Record/getRecordsNoPay";
+    ajaxHelper.get(recordsNoPaid, function(response) {
+        if (response) {
+            _recordsNoPay = response;
+
+            if (callbackAfterResponse){
+                callbackAfterResponse();
+            }
         }
-   });
+   }, errorAjaxHandler);
 }
 
 /**
@@ -330,8 +355,9 @@ function fillDesktopDropdown() {
     if (records.length > 0) {
         $sDesktops.append($("<option />").val(0).text('Seleccione una computadora'));
         $.each(records.filter(w => w.fechaFin === null), function(i, r) {
+            var recordTime = moment(r.fechaInicio);
             var desktop = Enumerable.from(desktops).where(w => w.idComputadora === r.idComputadora).firstOrDefault();
-            $sDesktops.append($("<option />").val(desktop.idComputadora).text(desktop.nombre));
+            $sDesktops.append($("<option />").val(desktop.idComputadora).text(desktop.nombre + ' - ' + recordTime.format('DD/MM/YYYY h:mm A')));
         });
     }
 }
@@ -392,7 +418,7 @@ function addProductToTicket() {
     }
 
     const ticket = Enumerable.from(_tickets).where(w => w.idTicket === _idTicket).firstOrDefault();
-    const found = Enumerable.from(ticket.ticketsDetalle).where(w => w.idProducto === idProducto).firstOrDefault();
+    const found = Enumerable.from(ticket.Detalle).where(w => w.idProducto === idProducto).firstOrDefault();
 
     // Insertar nuevo registro
     if (found === null) {
@@ -411,15 +437,6 @@ function addProductToTicket() {
     } else {
         // actualizar registro existente
         actualizarTicketDetalle(found.idTicketDetalle, cantidad);
-
-        // actualizar lista de maquinas
-        actualizarListaTickets();
-    }
-   
-    
-    // actualizar la lista de tickets en la pagina de punto de venta
-    if (document.location.href.includes('punto-venta.html')) {
-        actualizarListaTickets();
     }
     
     // muestra el nombre del ticket
@@ -450,7 +467,10 @@ function mostrarNombreTicket(ticket) {
         if (record !== null) {
             var desktopName = Enumerable.from(desktops).where(w => w.idComputadora === record.idComputadora).select(s => s.nombre).firstOrDefault();
             var recordTime = moment(record.fechaInicio);
-            ticketTitle = desktopName + ' - ' + recordTime.format('DD/MM/YYYY h:mm A');
+            if (desktopName === null) {
+                desktopName = 'Ticket No. ' + _idTicket;
+            }
+            ticketTitle = desktopName  + ', ' + recordTime.format('DD/MM/YYYY h:mm A');
         } else {
             const fecha = moment(ticket.fecha);
             ticketTitle = 'Ticket No. ' + _idTicket + ', ' + fecha.format('DD/MM/YYYY h:mm A');
@@ -478,7 +498,7 @@ function mostrarProductosEnGrid(ticket) {
     var totalTicket = 0;
     var tieneRentaEquipo = false;
     if (ticket !== null) {
-        $.each(ticket.ticketsDetalle, function (i, d) {
+        $.each(ticket.Detalle, function (i, d) {
             var rowTemplate = $('#trRowGridTicket').html();
             const producto = Enumerable.from(productos).where(w => w.idProducto === d.idProducto).firstOrDefault();
             let total = 0;
@@ -557,7 +577,11 @@ function fillComputerList() {
         if (tick.idRegistro !== null) {
             const record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === tick.idRegistro).firstOrDefault();
             if (record !== null) {
-                itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', getDesktopName(record.idComputadora));
+                var name = getDesktopName(record.idComputadora);
+                if (name === '') {
+                    name = 'Ticket No. ' + tick.idTicket;
+                }
+                itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', name);
                 const startTime = moment(record.fechaInicio);
                 itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
             } else {
@@ -572,7 +596,7 @@ function fillComputerList() {
             itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
         }
         
-        itemComputerListTemplate = itemComputerListTemplate.replace('{products}',  tick.ticketsDetalle.length + (tick.ticketsDetalle.length === 1 ? ' producto' : ' productos'));
+        itemComputerListTemplate = itemComputerListTemplate.replace('{products}',  tick.Detalle.length + (tick.Detalle.length === 1 ? ' producto' : ' productos'));
 
         computerList.append(itemComputerListTemplate);
     });
@@ -584,14 +608,15 @@ function fillComputerList() {
  * @param {*} ticket 
  */
 function crearTicket(ticket) {
-    $.post(apiURL + '/api/createTicket', ticket, function (data) {
-        if (data.result) {
+    var createTicketURL = apiURL + 'api/Ticket/createTicket';
+    ajaxHelper.post(createTicketURL, ticket, function (data) {
+        if (data) {
             // Obtener tickets pendientes por cobrar
-            getTicketsPending();
+            getTicketsPending(true, true);
 
-            _idTicket = data.ticket.idTicket;
+            _idTicket = data.idTicket;
         }
-    });
+    }, errorAjaxHandler);
 }
 
 /**
@@ -600,11 +625,12 @@ function crearTicket(ticket) {
  */
 function insertTicketDetalle(ticketDetalle) {
     const insert = buildTicketDetailInsert(ticketDetalle);
-    $.post(apiURL + '/api/createTicketDetalle', { strInsert: insert }, function(data) {
-        if (data.result) {
-            getTicketsPending(true);
+    var insertTicketDetalleURL = apiURL + 'api/Ticket/createTicketDetalle';
+    ajaxHelper.post(insertTicketDetalleURL, { strInsert: insert }, function(data) {
+        if (data) {
+            getTicketsPending(true, true);
         }
-    });
+    }, errorAjaxHandler);
 }
 
 /**
@@ -612,11 +638,13 @@ function insertTicketDetalle(ticketDetalle) {
  * @param {*} ticketDetalle objeto del registro que sera insertado
  */
 function actualizarTicketDetalle(idTicketDetalle, cantidad, precio = null) {
-    $.post(apiURL + '/api/updateTicketDetalle', { idTicketDetalle: idTicketDetalle, cantidad: cantidad, precio: precio }, function(data) {
-        if (data.result) {
-            getTicketsPending(true);
+    var actualizarTicketDetalleURL = apiURL + 'api/Ticket/updateTicketDetalle';
+    const tDetalle = { idTicketDetalle: idTicketDetalle, cantidad: cantidad, precio: precio };
+    ajaxHelper.post(actualizarTicketDetalleURL, tDetalle, function(data) {
+        if (data) {
+            getTicketsPending(true, true);
         }
-    });
+    }, errorAjaxHandler);
 }
 
 
@@ -626,23 +654,13 @@ function actualizarTicketDetalle(idTicketDetalle, cantidad, precio = null) {
  * @param {*} idTicketDetalle IdTicketDetalle
  */
 function eliminarTicketDetalle(idTicketDetalle) {
-    $.post(apiURL + '/api/deleteTicketDetalle', { idTicketDetalle: idTicketDetalle }, function(data) {
-        if (data.result) {
-            getTicketsPending(true);
+    ajaxHelper.post(apiURL + 'api/Ticket/deleteTicketDetalle', { idTicketDetalle: idTicketDetalle }, function(data) {
+        if (data) {
+            getTicketsPending(true, true);
             // mensaje de elimar producto
             notify('top', 'right', 'fa fa-comments', 'success', ' Producto eliminado, ', 'el producto fue eliminado satisfactoriamente.');
-
-            // actualizar lista de los tickets
-            actualizarListaTickets();
         }
-    });
-}
-
-function actualizarListaTickets() {
-    setTimeout(() => {
-        fillComputerList();
-        $('#computerList a[id="' + _idTicket + '"]').trigger('click');
-    }, 500);
+    }, errorAjaxHandler);
 }
 
 /**
@@ -651,13 +669,13 @@ function actualizarListaTickets() {
  * @param {*} idTicketDetalle IdTicketDetalle
  */
 function eliminarTicket(idTicket) {
-    $.post(apiURL + '/api/deleteTicket', { idTicket: idTicket }, function(data) {
-        if (data.result) {
-            getTicketsPending(true);
+    ajaxHelper.post(apiURL + 'api/Ticket/deleteTicket', { idTicket: idTicket }, function(data) {
+        if (data) {
+            getTicketsPending(true, true);
 
             notify('top', 'right', 'fa fa-comments', 'success', ' Ticket eliminado, ', 'el ticket fue eliminado satisfactoriamente.');
         }
-    });
+    }, errorAjaxHandler);
 }
 
 /**
@@ -683,14 +701,15 @@ function crearNuevoTicket(idRegistro = 0, limpiarGrid = true) {
         cleanGridAndProductControls();
     }    
     
-    const usuario = JSON.parse(sessionStorage.getItem('userLoggedIn'));
+    const jwt = parseJwt(sessionStorage.token);
+    const idUsuario = parseInt(jwt.nameid);
 
     let ticket = {
         total: 0,
         pago: 0,
         cambio: 0,
         idRegistro: idRegistro,
-        idUsuario: usuario.idUsuario
+        idUsuario: idUsuario
     }
 
     // crear nuevo ticket
@@ -699,8 +718,6 @@ function crearNuevoTicket(idRegistro = 0, limpiarGrid = true) {
     // Actualizar/limpiar valores
     if (location.href.includes('punto-venta.html')) {
         quitarSeleccionLista();
-        // ejecutar metodo para recrear lista de tickets
-        actualizarListaTickets();
     }     
 }
 
@@ -729,8 +746,8 @@ function cleanGridAndProductControls() {
     $('#iTotal').val('');
     $('#iPago').val('');
     $('#iCambio').val('');
-
-    // dropdown product
+    $('#hDesktopName').html('');
+    
     // dropdown product
     $('.chosen-single').addClass('chosen-default');
     $('.chosen-single span').html('Seleccione un producto...');
@@ -740,26 +757,20 @@ function cleanGridAndProductControls() {
     $('#addTicketItem').modal('toggle');
 }
 
-/**
- * Get current active desktops
- */
-function getDesktopsActive() {
-    
-    $.get(apiURL + "/api/getDesktopsInUse", function(data) {
-
-        if (data.length > 0) {
-            $(data).each(function(i, e) {
-                var input = $('#stCompu-' + e.idComputadora);
-                var desktopIcon = input.parent().parent().parent().find("a > i.fa");
-                desktopIcon.attr("style", "color: #4caf50");
-                input.prop("checked", true);
-                    
-            })
-
-            sessionStorage.setItem('destopInUse', JSON.stringify(data));
-        }
-    });
-}
+// /**
+//  * Activar computadoras que estan siendo usadas
+//  */
+// function activateDesktops() {
+//     const records =  getDesktopRecords();
+//     $(records).each(function(i, rec) {
+//         if (rec.fechaFin === null) {
+//             var input = $('#stCompu-' + rec.idComputadora);
+//             var desktopIcon = input.parent().parent().parent().find("a > i.fa");
+//             desktopIcon.attr("style", "color: #4caf50");
+//             input.prop("checked", true);
+//         }
+//     });
+// }
 
 
 /**
@@ -770,7 +781,7 @@ function getDesktopName(idComputadora) {
     if (sessionStorage.getItem('desktops') !== null) {
         const desktops = JSON.parse(sessionStorage.getItem('desktops'));
         const desktop = Enumerable.from(desktops).where(w => w.idComputadora === idComputadora).firstOrDefault();
-        return desktop.nombre;
+        return desktop !== null ? desktop.nombre : '';
     }
     return '';
 }
@@ -787,7 +798,7 @@ $('#update').click(function () {
  */
 $('#logout').click(function () {
     const userInfo = JSON.parse(sessionStorage.getItem('userLoggedIn'));
-    $.post(apiURL + '/api/logout', { idSesion: userInfo.idSesion }, function(data) {
+    $.post(apiURL + 'api/logout', { idSesion: userInfo.idSesion }, function(data) {
         if(data.result) {
             const ipServer = sessionStorage.getItem('IPServer');
             sessionStorage.clear();
@@ -814,7 +825,6 @@ ipcRenderer.on('time-off', (event, arg) => {
     _input = $('#stCompu-' + desktop.idComputadora);
     _input.prop("checked", false);
     changeColorDesktopIcon();
-    saveDesktopToPurchase(desktop);
 
     /*
     const modalPath = path.join('file://', __dirname, '/modal.html')
@@ -835,42 +845,70 @@ ipcRenderer.on('time-off', (event, arg) => {
 ipcRenderer.on('clientClosed', (event, arg) => {
     // ip de maquina desconectada
     const ipClient = arg;
-    // arreglo de maquinas
-    var desktops = JSON.parse(sessionStorage.getItem('desktops'));
     
-    // recorrer arreglo de sockets
-    _arrClients.forEach(cli => {
-        // si la IP coincide, proceder con la actualizacion en BD
-        if (ipClient.includes(cli.data.IP)) {
-            // obtener objeto de la maquina a desconectar
-            var desktop = Enumerable.from(desktops).where(w => w.nombre === cli.data.hostname).firstOrDefault();
+    if (_arrClients && _arrClients.length > 0) {
+        // recorrer arreglo de sockets
+        _arrClients.forEach(cli => {
+            // si la IP coincide, proceder con la actualizacion en BD
+            if (ipClient.includes(cli.data.IP)) {
+                // obtener objeto de la maquina a desconectar
+                var desktop = getDesktopInfoByNameFromStorage(cli.data.hostname);
 
-            if(desktop !== null) {
-                // valores para sacar de linea la maquina desconectada
-                var data = { idComputadora: desktop.idComputadora, enLinea: false };
-                $.post(apiURL + '/api/setDesktopOnline', data, function(response) {
-                    if (response.result) {
-                        
-                        // eliminar del arreglo de sockets la maquina desconectada
-                        _arrClients = $.grep(_arrClients, function(r) {
-                            return !ipClient.includes(r.data.IP);
-                        });
+                if(desktop !== null && desktop.idComputadora) {
+                    // valores para sacar de linea la maquina desconectada
+                    var data = { idComputadora: desktop.idComputadora, enLinea: false };
+                    setDesktopStatus(data);
 
-                        // si la aplicacion esta en el index, este se actualizara
-                        // automaticamente
-                        mostrarComputadorasDisponibles();
-                    }
-                });
+                    // eliminar del arreglo de sockets la maquina desconectada
+                    _arrClients = $.grep(_arrClients, function(r) {
+                        return !ipClient.includes(r.data.IP);
+                    });
+                }
             }
-        }
-    });
+        });
+    }
 });
 
-function mostrarComputadorasDisponibles() {
-    if (document.location.href.includes('index.html')) {
-        setTimeout(() => {
-            drawDesktops();
-        }, 200);
+/**
+ * Actualizar el estado de una computadora, si ésta está
+ * activa o no, y devuelve la lista de las computadoras activas
+ * @param {*} data objeto para actualizar el estado de una computadora
+ * por ejemplo: let d = { idComputadora: desktopInfo.idComputadora, enLinea: true };
+ */
+function setDesktopStatus(data) {
+    ajaxHelper.post(apiURL + 'api/Desktop/setDesktopOnline', data, function(response) {
+        if (response) {
+            console.log(response);
+            showDesktops(response);
+            setGreenDesktopsUsed();
+        }
+    }, errorAjaxHandler);
+}
+
+/**
+ * Ajax call to get the desktop info data
+ */
+function getDesktopByName(name) {
+    ajaxHelper.get(apiURL + 'api/Desktop/getDesktopByName?name='+ name, function (data, textStatus, jqXHR){
+        if (data) {
+            let desktopInfo = data;
+            setDesktopInfoToStorage(data);
+            let d = { idComputadora: desktopInfo.idComputadora, enLinea: true };
+            setDesktopStatus(d);
+            // ipcRenderer.send('getSockets', desktopInfo);
+            sendDesktopInfoFromSocket(desktopInfo);
+        }
+    }, errorAjaxHandler);
+}
+
+/**
+ * Enviar el objeto computadora al cliente socket correspondiente
+ * @param {*} desktopInfo Objeto que se enviara al cliente socket
+ */
+function sendDesktopInfoFromSocket(desktopInfo) {
+    let client = getClient(desktopInfo.nombre);
+    if (client) {        
+        client.sock.write(JSON.stringify(desktopInfo));
     }
 }
 
@@ -879,24 +917,132 @@ function mostrarComputadorasDisponibles() {
  * en el panel de control de las maquinas
  */
 ipcRenderer.on('clientConnected', (event, arg) => {
-    var cli = JSON.parse(arg);
+    let cli = JSON.parse(arg);
     if(cli.connected) {
-        ipcRenderer.send('getSockets', 1);
-        
+        _arrClients = remote.getGlobal('clients');
+        getDesktopByName(cli.hostname);
     }
 });
 
+/**
+ * Actualiza en el Storage el objeto desktops
+ * @param {*} desktop Objeto de la informacion de la computadora a actualizar
+ */
+function setDesktopInfoToStorage(desktop) {
+    var desktops = [];
+    if (sessionStorage.getItem('desktops') === null) {
+        desktops.push(desktop);
+    } else {
+        var desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        desktops = $.grep(desktops, (e, i) => {
+            return e.idComputadora !== desktop.idComputadora;
+        });
+
+        desktops.push(desktop);
+    }
+
+    if (desktops.length > 0) {
+        sessionStorage.setItem('desktops', JSON.stringify(desktops));
+        return desktops;
+    } else {
+        sessionStorage.removeItem('desktops');
+        return null;
+    }
+}
+
+/**
+ * Obtiene el objeto computadora desde el local storage
+ * @param {*} name nombre de la computadora
+ */
+function getDesktopInfoByNameFromStorage(name) {
+    if (sessionStorage.getItem('desktops') !== null) {
+        const desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        const desktopInfo = Enumerable.from(desktops).where(w => w.nombre === name).firstOrDefault();
+        return desktopInfo;
+    }
+
+    return undefined;
+}
+
+function getDesktopInfoByIdFromStorage(id) {
+    if (sessionStorage.getItem('desktops') !== null) {
+        const desktops = JSON.parse(sessionStorage.getItem('desktops'));
+        const desktopInfo = Enumerable.from(desktops).where(w => w.idComputadora === id).firstOrDefault();
+        return desktopInfo;
+    }
+
+    return undefined;
+}
+
 ipcRenderer.on('sockets', (event, arg) => {  
-    _arrClients = arg
-    mostrarComputadorasDisponibles();
+    _arrClients = arg.clients;
+    // mostrarComputadorasDisponibles();
 });
 
 /**
- * Obtener los registros del tiempo de uso de cada computadora y almacenarlo en el sessionStorage
+ * Devuelve el cliente Socket de una maquina logueada en el servidor
+ * @param {*} hostname Nombre de la maquina 
  */
-ipcRenderer.on('record', (event, arg) => {
-    var records = [];
-    var record = JSON.parse(arg);
+function getClient(hostname) {
+    var client = {};
+    // buscar maquina
+    for (var i = 0; i < _arrClients.length; i++) {
+        if (_arrClients[i].data.hostname === hostname) {
+            client = _arrClients[i];
+        }
+    }
+    // regresa socket de la maquina se esta buscando
+    return client;
+}
+
+/**
+ * 
+ * @param {*} record 
+ */
+function setDesktopRecord(record) {
+
+    var data = { idComputadora: record.idComputadora, fecha: record.fecha, minutos: record.minutos, idUsuario: record.idUsuario }
+    ajaxHelper.post(apiURL + 'api/Record/desktopRecord', data, function(result) {
+        console.log(result);
+        saveDesktopRecordsOnStorage(result);
+        getTicketsPending();
+    }, errorAjaxHandler);
+}
+
+/**
+ * Obtiene todos los registros de computadoras pendientes por cobrar
+ */
+function getDesktopRecords() {
+    let records = [];
+    if (sessionStorage.getItem('desktopRecords') !== null) {
+        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
+        return records;
+    }
+
+    return undefined;
+}
+
+/**
+ * Obtener el registro de uso de una computadora en especifico
+ * @param {*} idRegistro id registro
+ */
+function getDesktopRecordById(idRegistro) {
+    const records = getDesktopRecords();
+    if (records) {
+        const record = Enumerable.from(records).where(w => w.idRegistro === idRegistro).firstOrDefault();
+        return record;
+    }
+
+    return undefined;
+}
+
+/**
+ * Guardar los registros de uso de las computadoras en el session storage
+ * @param {*} r objeto del registro a guardar
+ */
+function saveDesktopRecordsOnStorage(r) {
+    let records = [];
+    let record = r;
     if (sessionStorage.getItem('desktopRecords') !== null) {
         records = JSON.parse(sessionStorage.getItem('desktopRecords'));
         // buscar registro en arreglo
@@ -934,5 +1080,69 @@ ipcRenderer.on('record', (event, arg) => {
 
     // guardando en el storage los registros de uso de las maquinas
     sessionStorage.setItem('desktopRecords', JSON.stringify(records));
+}
+
+/**
+ * Obtener los registros del tiempo de uso de cada computadora 
+ * y almacenarlo en el sessionStorage
+ */
+ipcRenderer.on('record', (event, arg) => {
+    var records = [];
+    var record = JSON.parse(arg);
+
+    setDesktopRecord(record);    
 });
 
+/**
+ * Solicita la informacion del nombre de la maquina
+ */
+ipcRenderer.on('requestDesktopInfo', (event, arg) => {
+    const desktop = getDesktopInfoByNameFromStorage(arg);
+    if (desktop !== null && desktop !== undefined) {
+        var client = getClient(desktop.nombre);
+        if (!$.isEmptyObject(client)) {
+            client.sock.write(JSON.stringify(desktop));
+        }
+    }
+});
+
+function errorAjaxHandler(data, textStatus, jqXHR) {
+    console.log('Data: ');
+    console.log(data);
+    console.log('\n status: ' + textStatus + '\n xhr: ' + jqXHR);
+}
+
+function httpHeaders() {
+    return { "Authorization": sessionStorage.getItem('token') };
+}
+
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace('-', '+').replace('_', '/');
+    return JSON.parse(window.atob(base64));
+};
+
+var ajaxHelper = {
+    get: function(url, fnSuccess, fnError) {
+        $.ajax({
+            url: url,
+            type: "GET",
+            contentType: "application/json",
+            headers: httpHeaders(),
+            success: function (data, textStatus, jqXHR) { fnSuccess(data, textStatus, jqXHR); },
+            error: function (data, textStatus, jqXHR) { errorAjaxHandler(data,textStatus, jqXHR); }
+        });
+    },
+
+    post: function(url, paramObj, fnSuccess, fnError) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: JSON.stringify(paramObj),
+            contentType: "application/json",
+            headers: httpHeaders(),
+            success: function (data, textStatus, jqXHR) { fnSuccess(data, textStatus, jqXHR); },
+            error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
+        });
+    }
+}

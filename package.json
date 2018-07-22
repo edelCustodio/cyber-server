@@ -54,7 +54,7 @@
     }
   },
   "main": "main.js",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "MIT",
   "description": "Aplicacion de escritorio para control de un cyber cafe asi como un punto de venta.",
   "author": "Edel Custodio Frias",
