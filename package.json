@@ -1,5 +1,14 @@
 {
   "name": "cyber-server",
+  "main": "main.js",
+  "version": "0.1.9",
+  "license": "MIT",
+  "description": "Aplicacion de escritorio para control de un cyber cafe asi como un punto de venta.",
+  "author": "Edel Custodio Frias",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edelCustodio/cyber-server.git"
+  },
   "dependencies": {
     "auto-launch": "5.0.5",
     "bcrypt-nodejs": "0.0.3",
@@ -52,14 +61,5 @@
         }
       ]
     }
-  },
-  "main": "main.js",
-  "version": "0.1.8",
-  "license": "MIT",
-  "description": "Aplicacion de escritorio para control de un cyber cafe asi como un punto de venta.",
-  "author": "Edel Custodio Frias",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/edelCustodio/cyber-server.git"
   }
 }

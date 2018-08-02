@@ -14,7 +14,7 @@ var _tickets = [];
 var _ticket = {};
 var _recordsNoPay = [];
 var _idTicket = 0;
-var port = 8080; // 7070
+var port = 8080; // 8080 51990
 
 
 /*--------------------------------------
@@ -107,7 +107,7 @@ $(document).ready(function () {
 ipcRenderer.on('getForIPServer', (event, arg) => {  
     var ips = JSON.parse(arg);
     sessionStorage.setItem('IPServer', ips.ipServer);
-     apiURL = 'http://' + ips.ipServer + ':' + port + '/';
+    apiURL = 'http://' + ips.ipServer + ':' + port + '/';
     // apiURL = 'http://localhost:' + port + '/';
     sessionStorage.setItem('IPServer', ips.ipServer);
 });
@@ -875,30 +875,50 @@ ipcRenderer.on('clientClosed', (event, arg) => {
  * @param {*} data objeto para actualizar el estado de una computadora
  * por ejemplo: let d = { idComputadora: desktopInfo.idComputadora, enLinea: true };
  */
-function setDesktopStatus(data) {
-    ajaxHelper.post(apiURL + 'api/Desktop/setDesktopOnline', data, function(response) {
-        if (response) {
-            console.log(response);
-            showDesktops(response);
-            setGreenDesktopsUsed();
-        }
-    }, errorAjaxHandler);
+function setDesktopStatus(d) {
+    var url = apiURL + 'api/Desktop/setDesktopOnline';
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: JSON.stringify(d),
+        contentType: "application/json",
+        success: function (data, textStatus, jqXHR) {
+            if (data) {
+                console.log(data);
+                showDesktops(data);
+                setGreenDesktopsUsed();
+            }
+        },
+        error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
+    });
 }
 
 /**
  * Ajax call to get the desktop info data
  */
 function getDesktopByName(name) {
-    ajaxHelper.get(apiURL + 'api/Desktop/getDesktopByName?name='+ name, function (data, textStatus, jqXHR){
-        if (data) {
-            let desktopInfo = data;
-            setDesktopInfoToStorage(data);
-            let d = { idComputadora: desktopInfo.idComputadora, enLinea: true };
-            setDesktopStatus(d);
-            // ipcRenderer.send('getSockets', desktopInfo);
-            sendDesktopInfoFromSocket(desktopInfo);
-        }
-    }, errorAjaxHandler);
+    var url = apiURL + 'api/Desktop/getDesktopByName?name='+ name;
+    $.ajax({
+        url: url,
+        type: "GET",
+        contentType: "application/json",
+        success: function (data, textStatus, jqXHR) {
+            if (data) {
+                let desktopInfo = data;
+                setDesktopInfoToStorage(data);
+                let d = { idComputadora: desktopInfo.idComputadora, enLinea: true };
+                setDesktopStatus(d);
+                // ipcRenderer.send('getSockets', desktopInfo);
+                sendDesktopInfoFromSocket(desktopInfo);
+            }
+        },
+        error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
+    });
+    
+    // ajaxHelper.get(apiURL + 'api/Desktop/getDesktopByName?name='+ name, function (data, textStatus, jqXHR){
+        
+    // }, errorAjaxHandler);
 }
 
 /**
