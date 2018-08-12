@@ -60,24 +60,33 @@ $(document).off("click", ".contacts input[type='checkbox'], a.ci-avatar")
     _checkedObj = {};
     _checkedObj = getCheckboxDesktop($this)
     _input = _checkedObj.input;
+    var id = parseInt(_input.attr("id").split("-")[1]);
+    var desktops = sessionStorage.getItem('desktops') !== null ? JSON.parse(sessionStorage.getItem('desktops')) : [];
+    var desktop = Enumerable.from(desktops).where(w => w.idComputadora === id).firstOrDefault();
 
     if(_checkedObj.isChecked) {
         $("#startOrStopDesktop").modal();
         $('#cbCountDown').attr('checked', false);
         $('#sCountdown').attr('disabled', true);
-        
     } else {
-        var message = { start: false, countDown: false, minutes: 0 };
-        // Detener reloj contador
-        var client = getDesktopClient();
-    
-        if (!$.isEmptyObject(client))
-            client.sock.write(JSON.stringify(message));
-
-        _input.prop("checked", false);
-        changeColorDesktopIcon();
+        alertExecuteFunction('Detener ' + desktop.nombre, 'Estas seguro que deseas detener el uso de esta computadora?', 'warning', detenerComputadora);
     }
 });
+
+/**
+ * 
+ */
+function detenerComputadora() {
+    var message = { start: false, countDown: false, minutes: 0 };
+    // Detener reloj contador
+    var client = getDesktopClient();
+
+    if (!$.isEmptyObject(client))
+        client.sock.write(JSON.stringify(message));
+
+    _input.prop("checked", false);
+    changeColorDesktopIcon();
+}
 
 //Iniciar el reloj en la maquina seleccionada
 $(document).off('click', '#btnClockStart').on('click', '#btnClockStart', function () {
@@ -156,43 +165,6 @@ function getCheckboxDesktop(element) {
 }
 
 /**
- * Canbiar color a la imagen de la computadora
- */
-function changeColorDesktopIcon() {
-    var desktopIcon = _input.parent().parent().parent().find("a > i.fa")
-    if(_input.is(":checked"))
-        desktopIcon.attr("style", "color: #4caf50");
-    else
-        desktopIcon.attr("style", "color: #ccc");
-    
-}
-
-/**
- * Poner en color verde las computadoras que estan siendo usadas
- * con respecto a los registros no pagados de las maquinas y que
- * la fecha de fin sea nula
- */
-function setGreenDesktopsUsed() {
-    if(_recordsNoPay && _recordsNoPay.length > 0) {
-        _recordsNoPay.forEach(d => {
-            if (d.fechaFin === null) {
-                _input = $('#stCompu-'+ d.idComputadora);
-                _input.prop("checked", true);
-                changeColorDesktopIcon();
-                const desktop = getDesktopInfoByIdFromStorage(d.idComputadora);
-                if (desktop !== null && desktop !== undefined) {
-                    var client = getClient(desktop.nombre);
-                    if (!$.isEmptyObject(client)) {
-                        var j = { init: true, record: d };
-                        client.sock.write(JSON.stringify(j));
-                    }
-                }                    
-            }
-        });
-    }
-}
-
-/**
  * Iniciar o detener el reloj contador para la computadora seleccionada
  */
 function startDesktop() {
@@ -253,9 +225,8 @@ function getDesktopNameSelected() {
 
 //show add product modal and fill out the fields
 $('#showAddProductModal').click(function () {
-    const records = getDesktopRecords();
-    const isUsed = validateDesktopInUse(records);
-    if(records && records.length > 0 && isUsed) {
+    const isUsed = validateDesktopInUse();
+    if(isUsed) {
         // populate desktop dropdown
         fillDesktopDropdown();
         //show modal
@@ -268,12 +239,11 @@ $('#showAddProductModal').click(function () {
 /**
  * Validar si hay por lo menos un solo registro que indique
  * que una computadora esta en uso
- * @param {*} records registros del uso de las computadoras
  */
-function validateDesktopInUse(records) {
+function validateDesktopInUse() {
     let isUsed = false;
-    if (records.length > 0) {
-        records.forEach(r => {
+    if (_recordsNoPay.length > 0) {
+        _recordsNoPay.forEach(r => {
             if (r.fechaFin === null) {
                 isUsed = true;
                 return false;
@@ -290,8 +260,7 @@ $('#sDesktops').change(function () {
     _idComputadora = parseInt($(this).val());
     if (_idComputadora > 0) {
         let ticket = null;
-        const records = JSON.parse(sessionStorage.getItem('desktopRecords'));
-        const rec = Enumerable.from(records).where(w => w.idComputadora === _idComputadora && w.fechaFin === null).firstOrDefault();
+        const rec = Enumerable.from(_recordsNoPay).where(w => w.idComputadora === _idComputadora && w.fechaFin === null).firstOrDefault();
         if (rec !== null) {
             if (_tickets.length > 0) {
                 ticket = Enumerable.from(_tickets).where(w => w.idRegistro === rec.idRegistro).firstOrDefault();

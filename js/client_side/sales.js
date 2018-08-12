@@ -4,7 +4,7 @@
 $(document).ready(function () {
     getRecordsNoPay();
     getProducts();
-    getTicketsPending(false, true);
+    // getTicketsPending(false, true);
     fillDesktopDropdown();
     // limpiar ticket
     _idTicket = 0;
@@ -20,7 +20,6 @@ $(document).off('click', '#computerList a').on('click', '#computerList a', funct
     const anchor = $(this);
     _idTicket = parseInt(anchor.attr('id'));
     const ticket = Enumerable.from(_tickets).where(w => w.idTicket === _idTicket).firstOrDefault();
-    const records = JSON.parse(sessionStorage.getItem('desktopRecords'));
     // quita la seleccion de todos los elementos
     quitarSeleccionLista();
 
@@ -71,7 +70,7 @@ function pagarTicket() {
         if (data) {
             sessionStorage.setItem('idTicket', _idTicket);
             // location.href = 'invoice.html';
-            location.reload();
+            location.reload(true);
         }
     }, errorAjaxHandler);
 }
@@ -103,6 +102,9 @@ $('#iPago').keyup(function () {
     $('#iCambio').val(cambio);
 });
 
+/**
+ * Obtiene el total a cobrar del ticket de venta
+ */
 function obtenerTotalTicket() {
     let total = 0;
     

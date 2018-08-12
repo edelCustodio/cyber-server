@@ -117,7 +117,7 @@
                     
                     <ul class="dropdown-menu pull-right dm-icon">
                         <!-- <li>
-                            <a id="update" style="cursor: pointer;"><i class="zmdi zmdi-refresh zmdi-hc-fw"></i> Actualizar</a>
+                            <a onclick="lockDesktop();" style="cursor: pointer;"><i class="zmdi zmdi-refresh zmdi-hc-fw"></i> bloquear</a>
                         </li> -->
                        
                         <li>
@@ -324,7 +324,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <div class="form-group">
                                     <div class="fg-line">
                                         <!-- <select id="sProductos" class="chosen" data-placeholder="Producto"></select> -->
@@ -333,34 +335,38 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="fg-line">
                                         <input type="number" id="iCantidad" class="form-control" placeholder="cantidad">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="fg-line">
                                         <input type="text" id="iPrecio" class="form-control" disabled placeholder="precio">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="fg-line">
                                         <input type="text" id="iTotal" class="form-control" disabled placeholder="total">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="fg-line">
                                         <button id="btnAgregarProducto" class="btn btn-success waves-effect">Agregar</button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-sm-12">
                                 <div class="form-group">
                                     <div class="fg-line">

@@ -4,6 +4,7 @@ const main = require('../../main');
 const desktopNames = [];
 const desktopsArray = [];
 const { ipcMain } = require('electron')
+const log = require('electron-log');
 
 global.clients = [];
 
@@ -51,30 +52,49 @@ var CyberControl = {
             
             // Add a 'data' event handler to this instance of socket
             sock.on('data', function(data) {
-                
-                var textData = data.toString('utf8');
-                var jsonData = null;
-                jsonData = JSON.parse(textData);                
-
-                if (jsonData !== null && jsonData.IP !== undefined) {
-                    for(var i = 0; i < clients.length; i++) {
-                        const remoteAddress = clients[i].sock.remoteAddress;
-                        if(remoteAddress.includes(jsonData.IP)) {
-                            clients[i].data = jsonData;
-                        }
+                try {
+                    var textData = data.toString('utf8');
+                    // var jsonData = null;
+                    // jsonData = JSON.parse(textData);  
+                    
+                    var arrJson = [];
+                    var countJsonString = (textData.match(/}/g) || []).length;
+                    if (countJsonString > 1) {
+                        var strJsonSplited = textData.split('}');
+                        strJsonSplited.forEach(s => {
+                            if (s.length > 0) {
+                                arrJson.push(JSON.parse(s + '}'));
+                            }
+                        });
+                    } else {
+                        arrJson.push(JSON.parse(textData));
                     }
-                    main.getMainWindow().webContents.send('clientConnected', JSON.stringify({ connected: true, hostname: jsonData.hostname }));
-                } else if (jsonData !== null && jsonData.idComputadora !== undefined && jsonData.timeOff === undefined) {
-                    main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
-                } else if (jsonData !== null && jsonData.timeOff !== undefined) {
-                    main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
-                    main.getMainWindow().webContents.send('time-off', jsonData.timeOff.client);
-                } else if (jsonData !== null && jsonData.closeApp) {
-                    main.getMainWindow().webContents.send('clientClosed', jsonData.hostname);
-                } else if (jsonData !== null && jsonData.requestDesktopInfo) {
-                    main.getMainWindow().webContents.send('requestDesktopInfo', jsonData.client);
+    
+                    arrJson.forEach(j => {
+                        var jsonData = j;
+                        
+                        if (jsonData !== null && jsonData.IP !== undefined) {
+                            for(var i = 0; i < clients.length; i++) {
+                                const remoteAddress = clients[i].sock.remoteAddress;
+                                if(remoteAddress.includes(jsonData.IP)) {
+                                    clients[i].data = jsonData;
+                                }
+                            }
+                            main.getMainWindow().webContents.send('clientConnected', JSON.stringify({ connected: true, hostname: jsonData.hostname }));
+                        } else if (jsonData !== null && jsonData.idComputadora !== undefined && jsonData.timeOff === undefined) {
+                            main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
+                        } else if (jsonData !== null && jsonData.timeOff !== undefined) {
+                            main.getMainWindow().webContents.send('record', JSON.stringify(jsonData));
+                            main.getMainWindow().webContents.send('time-off', jsonData.timeOff.client);
+                        } else if (jsonData !== null && jsonData.closeApp) {
+                            main.getMainWindow().webContents.send('clientClosed', jsonData.hostname);
+                        } else if (jsonData !== null && jsonData.requestDesktopInfo) {
+                            main.getMainWindow().webContents.send('requestDesktopInfo', jsonData.client);
+                        }
+                    });
+                } catch (e) {
+                    log.info(e);
                 }
-
             });
           
             // Add a 'close' event handler to this instance of socket

@@ -121,7 +121,7 @@ function drawDesktops(desktops) {
 
     if (desktops.length === 0 && _arrClients.length > 0) {
         _arrClients.forEach(cl => {
-            getDesktopByName(cl.data.hostname);
+            getDesktopByName(cl);
         });
     } else {
         showDesktops(desktops);
@@ -139,7 +139,8 @@ function showDesktops(desktops) {
         // con la maquina de cobro
         if (_arrClients && _arrClients.length > 0) {
             _arrClients.forEach(cl => {
-                if (cl.data.hostname.includes(pc.nombre)) {
+                // var hostname = cl.data.hostname;
+                if (cl.data.hostname && cl.data.hostname.includes(pc.nombre)) {
                     var template = $("#computadora-tmp").html();
                     template = template.replace("{idComputadora}", pc.idComputadora).replace("{nombreComputadora}", pc.nombre).replace("{idComputadora}", pc.idComputadora).replace("{idComputadora}", pc.idComputadora);
                     // allDesktops += template;
@@ -334,6 +335,10 @@ function getRecordsNoPay(callbackAfterResponse = undefined) {
         if (response) {
             _recordsNoPay = response;
 
+            if (location.href.includes('punto-venta.html')) {
+                getTicketsPending(false, true);
+            }
+
             if (callbackAfterResponse){
                 callbackAfterResponse();
             }
@@ -350,11 +355,10 @@ function fillDesktopDropdown() {
     $sDesktops.empty();
     //fill out computadora select element
     var desktops = JSON.parse(sessionStorage.getItem('desktops'));
-    var records = sessionStorage.getItem('desktopRecords') !== null ? JSON.parse(sessionStorage.getItem('desktopRecords')) : [];
 
-    if (records.length > 0) {
+    if (_recordsNoPay.length > 0) {
         $sDesktops.append($("<option />").val(0).text('Seleccione una computadora'));
-        $.each(records.filter(w => w.fechaFin === null), function(i, r) {
+        $.each(_recordsNoPay.filter(w => w.fechaFin === null), function(i, r) {
             var recordTime = moment(r.fechaInicio);
             var desktop = Enumerable.from(desktops).where(w => w.idComputadora === r.idComputadora).firstOrDefault();
             $sDesktops.append($("<option />").val(desktop.idComputadora).text(desktop.nombre + ' - ' + recordTime.format('DD/MM/YYYY h:mm A')));
@@ -576,7 +580,7 @@ function fillComputerList() {
         
         if (tick.idRegistro !== null) {
             const record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === tick.idRegistro).firstOrDefault();
-            if (record !== null) {
+            if (record != null && record.fechaFin !== null) {
                 var name = getDesktopName(record.idComputadora);
                 if (name === '') {
                     name = 'Ticket No. ' + tick.idTicket;
@@ -584,12 +588,16 @@ function fillComputerList() {
                 itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', name);
                 const startTime = moment(record.fechaInicio);
                 itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
-            } else {
-                // Esto no debe de pasar
-                itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', 'Ticket No. ' + tick.idTicket);
-                const startTime = moment(tick.fecha);
-                itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
+            } 
+            else {
+                itemComputerListTemplate = '';
             }
+            // else {
+            //     // Esto no debe de pasar
+            //     itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', 'Ticket No. ' + tick.idTicket);
+            //     const startTime = moment(tick.fecha);
+            //     itemComputerListTemplate = itemComputerListTemplate.replace('{hora}', startTime.format('DD/MM/YYYY h:mm A'));
+            // }
         } else {
             itemComputerListTemplate = itemComputerListTemplate.replace('{computerName}', 'Ticket No. ' + tick.idTicket);
             const startTime = moment(tick.fecha);
@@ -757,21 +765,42 @@ function cleanGridAndProductControls() {
     $('#addTicketItem').modal('toggle');
 }
 
-// /**
-//  * Activar computadoras que estan siendo usadas
-//  */
-// function activateDesktops() {
-//     const records =  getDesktopRecords();
-//     $(records).each(function(i, rec) {
-//         if (rec.fechaFin === null) {
-//             var input = $('#stCompu-' + rec.idComputadora);
-//             var desktopIcon = input.parent().parent().parent().find("a > i.fa");
-//             desktopIcon.attr("style", "color: #4caf50");
-//             input.prop("checked", true);
-//         }
-//     });
-// }
+/**
+ * Canbiar color a la imagen de la computadora
+ */
+function changeColorDesktopIcon() {
+    var desktopIcon = _input.parent().parent().parent().find("a > i.fa")
+    if(_input.is(":checked"))
+        desktopIcon.attr("style", "color: #4caf50");
+    else
+        desktopIcon.attr("style", "color: #ccc");
+    
+}
 
+/**
+ * Poner en color verde las computadoras que estan siendo usadas
+ * con respecto a los registros no pagados de las maquinas y que
+ * la fecha de fin sea nula
+ */
+function setGreenDesktopsUsed() {
+    if(_recordsNoPay && _recordsNoPay.length > 0) {
+        _recordsNoPay.forEach(d => {
+            if (d.fechaFin === null) {
+                _input = $('#stCompu-'+ d.idComputadora);
+                _input.prop("checked", true);
+                changeColorDesktopIcon();
+                const desktop = getDesktopInfoByIdFromStorage(d.idComputadora);
+                if (desktop !== null && desktop !== undefined) {
+                    var client = getClient(desktop.nombre);
+                    if (!$.isEmptyObject(client)) {
+                        var j = { init: true, record: d };
+                        client.sock.write(JSON.stringify(j));
+                    }
+                }                    
+            }
+        });
+    }
+}
 
 /**
  * Obtener el nombre de una computadora por id
@@ -785,13 +814,6 @@ function getDesktopName(idComputadora) {
     }
     return '';
 }
-
-/**
- * Actualizar ventana
- */
-$('#update').click(function () {
-    window.location.reload();
-});
 
 /**
  * Cerrar sesion
@@ -897,11 +919,19 @@ function setDesktopStatus(d) {
 /**
  * Ajax call to get the desktop info data
  */
-function getDesktopByName(name) {
-    var url = apiURL + 'api/Desktop/getDesktopByName?name='+ name;
+function getDesktopByName(client) {
+    var desktop = {
+        idComputadora: 0, 
+        IP: client.sock.address().address,
+        nombre: client.data.hostname,
+        costoRenta: 0,
+        enLinea: false
+    }
+    var url = apiURL + 'api/Desktop/getDesktopByName';
     $.ajax({
         url: url,
-        type: "GET",
+        type: "POST",
+        data: JSON.stringify(desktop),
         contentType: "application/json",
         success: function (data, textStatus, jqXHR) {
             if (data) {
@@ -915,10 +945,6 @@ function getDesktopByName(name) {
         },
         error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
     });
-    
-    // ajaxHelper.get(apiURL + 'api/Desktop/getDesktopByName?name='+ name, function (data, textStatus, jqXHR){
-        
-    // }, errorAjaxHandler);
 }
 
 /**
@@ -940,7 +966,11 @@ ipcRenderer.on('clientConnected', (event, arg) => {
     let cli = JSON.parse(arg);
     if(cli.connected) {
         _arrClients = remote.getGlobal('clients');
-        getDesktopByName(cli.hostname);
+        _arrClients.forEach(cl => {
+            if (cl.data.hostname === cli.hostname) {
+                getDesktopByName(cl);
+            }
+        });
     }
 });
 
@@ -1005,6 +1035,7 @@ ipcRenderer.on('sockets', (event, arg) => {
  */
 function getClient(hostname) {
     var client = {};
+    _arrClients = remote.getGlobal('clients');
     // buscar maquina
     for (var i = 0; i < _arrClients.length; i++) {
         if (_arrClients[i].data.hostname === hostname) {
@@ -1024,22 +1055,9 @@ function setDesktopRecord(record) {
     var data = { idComputadora: record.idComputadora, fecha: record.fecha, minutos: record.minutos, idUsuario: record.idUsuario }
     ajaxHelper.post(apiURL + 'api/Record/desktopRecord', data, function(result) {
         console.log(result);
-        saveDesktopRecordsOnStorage(result);
+        getRecordsNoPay();
         getTicketsPending();
     }, errorAjaxHandler);
-}
-
-/**
- * Obtiene todos los registros de computadoras pendientes por cobrar
- */
-function getDesktopRecords() {
-    let records = [];
-    if (sessionStorage.getItem('desktopRecords') !== null) {
-        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
-        return records;
-    }
-
-    return undefined;
 }
 
 /**
@@ -1047,59 +1065,12 @@ function getDesktopRecords() {
  * @param {*} idRegistro id registro
  */
 function getDesktopRecordById(idRegistro) {
-    const records = getDesktopRecords();
-    if (records) {
-        const record = Enumerable.from(records).where(w => w.idRegistro === idRegistro).firstOrDefault();
+    if (_recordsNoPay.length > 0) {
+        const record = Enumerable.from(_recordsNoPay).where(w => w.idRegistro === idRegistro).firstOrDefault();
         return record;
     }
 
     return undefined;
-}
-
-/**
- * Guardar los registros de uso de las computadoras en el session storage
- * @param {*} r objeto del registro a guardar
- */
-function saveDesktopRecordsOnStorage(r) {
-    let records = [];
-    let record = r;
-    if (sessionStorage.getItem('desktopRecords') !== null) {
-        records = JSON.parse(sessionStorage.getItem('desktopRecords'));
-        // buscar registro en arreglo
-        var findRecord = Enumerable.from(records).where(w => w.idRegistro === record.idRegistro).firstOrDefault();
-
-        // si no se encuentra el registro, se agrega un objeto
-        // nuevo al arreglo
-        if (findRecord === null) {
-            records.push(record);
-        } else {
-            // si se encuentra el registro, eliminarlo
-            // para su reemplazo
-            records = $.grep(records, function (r){
-                return r.idRegistro !== record.idRegistro;
-            });
-
-            // reemplazando el registro, por el objeto actualizado
-            records.push(record);
-        }
-    } else {
-        // agregando el primer objeto del arregle
-        records.push(record);
-    }
-
-    getRecordsNoPay();
-
-    // // Crear nuevo ticket en base al registro nuevo
-    // // de uso de la maquina
-    if (record.fechaFin === null) {
-        // crearNuevoTicket(record.idRegistro, false);
-        // setTimeout(() => {
-        //     drawDesktops();
-        // }, 100);
-    }
-
-    // guardando en el storage los registros de uso de las maquinas
-    sessionStorage.setItem('desktopRecords', JSON.stringify(records));
 }
 
 /**
@@ -1126,6 +1097,29 @@ ipcRenderer.on('requestDesktopInfo', (event, arg) => {
     }
 });
 
+
+function lockDesktop() {
+    var client = _arrClients[0];
+    client.sock.write(JSON.stringify({ window: { lock: true } }));
+}
+
+
+
+
+
+/**         AJAX CALLS
+ * --------------------------------------------------------------
+ * --------------------------------------------------------------
+ * --------------------------------------------------------------
+ * --------------------------------------------------------------
+ */
+
+/**
+ * 
+ * @param {*} data Error data
+ * @param {*} textStatus text status
+ * @param {*} jqXHR http response
+ */
 function errorAjaxHandler(data, textStatus, jqXHR) {
     console.log('Data: ');
     console.log(data);
