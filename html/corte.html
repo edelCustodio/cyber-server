@@ -8,18 +8,15 @@
         <title>Skynet</title>
 
         <!-- Vendor CSS -->
-        <link href="../libs/css/fullcalendar.min.css" rel="stylesheet">
         <link href="../libs/css/animate.min.css" rel="stylesheet">       
         <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
         <link href="../libs/css/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
         <link href="../libs/css/google-material-color/palette.css" rel="stylesheet">
-        <link href="../libs/css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
         <link href="../libs/css/chosen.min.css" rel="stylesheet">
         
         <!-- CSS -->
         <link href="../css/app.min.1.css" rel="stylesheet">
         <link href="../css/app.min.2.css" rel="stylesheet"> 
-        <link href="../css/index.css" rel="stylesheet"> 
         
     </head>
     <body data-ma-header="teal">
@@ -243,44 +240,10 @@
             <section id="content">
                 <div class="container">
                     <div class="c-header">
-                        <h2>Control de ciber</h2>
+                        <h2>Corte de caja</h2>
                     </div>
 
-                    <!-- Add button
-                    <button class="btn btn-float btn-danger m-btn"><i class="zmdi zmdi-plus"></i></button> -->
-
-                    <ul id="menu" class="mfb-component--br mfb-zoomin" data-mfb-toggle="hover">
-                        <li class="mfb-component__wrap">
-                          <a href="#" class="mfb-component__button--main">
-                            <i class="mfb-component__main-icon--resting zmdi fa fa-plus"></i>
-                            <i class="mfb-component__main-icon--active fa fa-times"></i>
-                          </a>
-                          <ul class="mfb-component__list">
-                            <li>
-                              <a data-toggle="modal" id="showAddProductModal" data-mfb-label="Agregar producto" class="mfb-component__button--child">
-                                <i class="mfb-component__child-icon fa fa-sticky-note-o"></i>
-                              </a>
-                            </li>
-                            <!-- <li>
-                              <a href="" data-mfb-label="Agregar PC" class="mfb-component__button--child">
-                                <i class="mfb-component__child-icon fa fa-desktop"></i>
-                              </a>
-                            </li> -->
-                          </ul>
-                        </li>
-                      </ul>
-
-                    <div class="card">
-                        <div class="action-header palette-Teal-400 bg clearfix">
-                            <div class="ah-label hidden-xs palette-White text">Computadoras disponibles</div>
-                        </div>
-
-                        <div class="card-body card-padding">
-                            <div id="divComputadoras" class="contacts clearfix row">
-                                
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </section>
 
@@ -306,160 +269,7 @@
                 </svg>
             </div>
         </div>
-
-        <div class="modal fade" id="addTicketItem" data-backdrop="static" data-keyboard="false" 
-            tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Agregar producto o servicio</h4>
-                    </div>
-                    <div class="modal-body container">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <div class="select">
-                                            <select id="sDesktops" class="form-control"></select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <!-- <select id="sProductos" class="chosen" data-placeholder="Producto"></select> -->
-                                        <select id="sProductos" class="chosen" data-placeholder="Seleccione un producto...">
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <input type="number" id="iCantidad" class="form-control" placeholder="cantidad">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <input type="text" id="iPrecio" class="form-control" disabled placeholder="precio">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <input type="text" id="iTotal" class="form-control" disabled placeholder="total">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <button id="btnAgregarProducto" class="btn btn-success waves-effect">Agregar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <div class="fg-line">
-                                        <table class="table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th></th>
-                                                    <th>#</th>
-                                                    <th>Producto</th>
-                                                    <th>Precio</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tbListProducts">
-                                                
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <!-- <button type="button" class="btn btn-link waves-effect">Agregar</button> -->
-                        <button type="button" id="btnCerrar" class="btn btn-link waves-effect" >Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="startOrStopDesktop" data-backdrop="static" data-keyboard="false" 
-            tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Iniciar registro de computadora.</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>Esta seguro que quiere iniciar esta computadora?</p>
-                        <form>
-                            <div class="input-group from-group">
-                                <div class="checkbox m-b-15">
-                                    <label>
-                                        <input id="cbCountDown" type="checkbox" value="">
-                                        <i class="input-helper"></i>
-                                        Desea especificar el tiempo de uso?
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="input-group form-group">
-                                <!-- <span class="input-group-addon"><i class="zmdi zmdi-time"></i></span> -->
-                                
-                                    <select name="" id="sCountdown" disabled>
-                                        <option value="0">Seleccione el tiempo de uso</option>
-                                        <option value="30">30 min</option>
-                                        <option value="60">1 hr</option>
-                                        <option value="90">1 hr 30 min</option>
-                                        <option value="120">2 hrs</option>
-                                        <option value="150">2 hrs 30 min</option>
-                                        <option value="180">3 hrs</option>
-                                        <option value="210">3 hrs 30 min</option>
-                                        <option value="240">4 hrs</option>
-                                        <option value="270">4 hrs 30 min</option>
-                                        <option value="300">5 hrs</option>
-                                        <option value="330">5 hrs 30 min</option>
-                                        <option value="360">6 hrs</option>
-                                        <option value="390">6 hrs 30 min</option>
-                                        <option value="420">7 hrs</option>
-                                        <option value="450">7 hrs 30 min</option>
-                                        <option value="480">8 hrs</option>
-                                        <option value="510">8 hrs 30 min</option>
-                                        <option value="540">9 hrs</option>
-                                        <option value="570">9 hrs 30 min</option>
-                                        <option value="600">10 hrs</option>
-                                    </select>
-                                    <!-- <input type="text" id="iCountDown" class="form-control" disabled placeholder="Ingresar los minutos a usar"> -->
-                                
-                            </div>
-                            
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Cerrar</button>
-                        <button id="btnClockStart" type="button" class="btn btn-primary waves-effect">Iniciar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
         
-        
-        <script src="../js/common.js"></script>
         <!-- Javascript Libraries -->
         <script src="../libs/js/bootstrap.min.js"></script>
        
@@ -467,7 +277,6 @@
         <script src="../libs/js/waves.min.js"></script>
         <script src="../libs/js/bootstrap-growl.min.js"></script>
         <script src="../libs/js/moment.min.js"></script>
-        <script src="../libs/js/fullcalendar.min.js"></script>
         <script src="../libs/js/jquery.simpleWeather.min.js"></script>
         <script src="../libs/js/salvattore.min.js"></script>
         
@@ -490,62 +299,5 @@
         <script src="../js/actions.js"></script>
         <script src="../js/demo.js"></script>
         
-        <script src="../js/client_side/index.js"></script>
-        
-        <script id="computadora-tmp" type="text/x-friasoft-tmpl">
-            <div class="col-md-2 col-sm-4 col-xs-6">
-                <div class="c-item">
-                    <a class="ci-avatar">
-                        <i class="fa fa-desktop fa-6" style="color: #ccc;" aria-hidden="true"></i>
-                    </a>
-        
-                    <div class="c-info">
-                        <div class="toggle-switch" data-ts-color="green">
-                            <input id="stCompu-{idComputadora}" type="checkbox" hidden="hidden">
-                            <label for="stCompu-{idComputadora}" class="ts-helper"></label>
-                        </div>
-                    </div>
-        
-                    <div class="c-footer">
-                        <label for="" style="width: 100%; text-align: center">{nombreComputadora}</label>
-                        <!-- <ul>
-                            <li><a><i class="zmdi zmdi-headset-mic zmdi-hc-fw"></i></a></li>
-                            <li><a><i class="zmdi zmdi-usb zmdi-hc-fw"></i></a></li>
-                            <li><a><i class="zmdi zmdi-videocam zmdi-hc-fw"></i></a></li>
-                            <li><a><i class="zmdi zmdi-card-sd zmdi-hc-fw"></i></a></li>
-                        </ul> -->
-                    </div>
-                </div>
-            </div>
-        </script>
-        <script id="trRowGridTicket" type="text/x-friasoft-tmpl">
-            <tr>
-                <td class="text-left">
-                    <button 
-                        id="delete-{idTicketDetalle}"
-                        type="button" 
-                        class="btn btn-icon command-delete waves-effect waves-circle" 
-                        data-row-id="10253">
-                        <span class="zmdi zmdi-delete"></span>
-                    </button>
-                </td>
-                <td>{contador}</td>
-                <td>{nombre}</td>
-                <td>$ {precio}</td>
-                <td>{cantidad}</td>
-                <td>$ {total}</td>
-            </tr>
-        </script>
-        <script id="trRowGridTicketTotal" type="text/x-friasoft-tmpl">
-            <tr>
-                <td class="text-left">
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><strong>Total:</strong></td>
-                <td>$ {Total}</td>
-            </tr>
-        </script>
     </body>
 </html>

@@ -1097,6 +1097,18 @@ ipcRenderer.on('requestDesktopInfo', (event, arg) => {
     }
 });
 
+/**
+ * Comunicacion entre el cliente y la maquina de cobro para
+ * solicitar informacion de los registros de uso, 
+ */
+ipcRenderer.on('requestDesktopRecord', (event, arg) => {
+    const desktop = getDesktopInfoByNameFromStorage(arg);
+    const record = Enumerable.from(_recordsNoPay).where(w => w.idComputadora === desktop.idComputadora && w.fechaFin === null).firstOrDefault();
+    var client = getClient(desktop.nombre);
+    var j = { init: true, record: record };
+    client.sock.write(JSON.stringify(j));
+});
+
 
 function lockDesktop() {
     var client = _arrClients[0];

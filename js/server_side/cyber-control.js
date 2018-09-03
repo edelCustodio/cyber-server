@@ -90,6 +90,8 @@ var CyberControl = {
                             main.getMainWindow().webContents.send('clientClosed', jsonData.hostname);
                         } else if (jsonData !== null && jsonData.requestDesktopInfo) {
                             main.getMainWindow().webContents.send('requestDesktopInfo', jsonData.client);
+                        } else if (jsonData !== null && jsonData.init) {
+                            main.getMainWindow().webContents.send('requestDesktopRecord', jsonData.client);
                         }
                     });
                 } catch (e) {
