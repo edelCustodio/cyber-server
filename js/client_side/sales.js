@@ -127,7 +127,7 @@ function obtenerTotalTicket() {
     const prod = Enumerable.from(productos).where(w => idProductos.indexOf(w.idProducto) > -1 && w.precio === 0).select(s => s.idProducto).toArray();
 
     if (prod.length > 0) {
-        let totalProdEspeciales = Enumerable.from(ticket.Detalle).where(w => prod.indexOf(w.idProducto) > -1).sum(s => s.precio);
+        let totalProdEspeciales = Enumerable.from(ticket.Detalle).where(w => prod.indexOf(w.idProducto) > -1).sum(s => s.total);
         total = total + totalProdEspeciales;
     }
 

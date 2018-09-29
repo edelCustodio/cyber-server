@@ -1588,11 +1588,28 @@ select.chosen {
   border-radius: 0;
 }
 
+.timepicker-picker .btn:not(.palette-White):not(.btn-default) {
+  color: #333;
+}
+
+.timepicker-picker .btn-primary {
+  color: #333;
+  background-color: #fff;
+  border-color: transparent;
+}
+
+.timepicker-picker .btn-primary:hover:hover {
+  color: #333;
+  background-color: #fff;
+  border-color: transparent;
+}
+
+/* 
 .timepicker-picker .btn,
 .timepicker-picker .btn:hover {
   background: #fff;
   color: #333;
-}
+} */
 
 .datepicker.top {
   -webkit-transform-origin: 0 100% !important;

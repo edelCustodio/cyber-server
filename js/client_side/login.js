@@ -27,8 +27,9 @@ $("#btnLogin").click(function (e) {
         success: function (data, textStatus, jqXHR) {
             // sessionStorage.setItem("userLoggedIn", JSON.stringify(data[0]));
             sessionStorage.setItem("token", data);
-    
-            document.location.href = "index.html";
+            const jwt = parseJwt(sessionStorage.token);
+            const idUsuario = parseInt(jwt.nameid);
+            ObtenerCorte(idUsuario);
         },
         error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
     });
@@ -37,7 +38,22 @@ $("#btnLogin").click(function (e) {
 });
 
 
-
+function ObtenerCorte(idUsuario) {
+    var corteURL = apiURL + 'api/corte/crear';
+    $.ajax({
+        url: corteURL,
+        type: "POST",
+        data: JSON.stringify(idUsuario),
+        contentType: "application/json",
+        headers: httpHeaders(),
+        success: function (data, textStatus, jqXHR) {
+            console.log(data);
+            sessionStorage.setItem('corte', JSON.stringify(data));
+            document.location.href = "index.html";
+        },
+        error: function (data, textStatus, jqXHR) { errorAjaxHandler(data, textStatus, jqXHR); }
+    });
+}
 
 $('#frNewAccont').validator().on('submit', function (e) {
 

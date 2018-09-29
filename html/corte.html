@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Skynet</title>
 
+        <link href="../node_modules/bootstrap-datetimepicker-npm/build/css/bootstrap-datetimepicker.css" rel="stylesheet"> 
         <!-- Vendor CSS -->
         <link href="../libs/css/animate.min.css" rel="stylesheet">       
         <link href="../libs/css/material-design-iconic-font.min.css" rel="stylesheet">
@@ -17,6 +18,25 @@
         <!-- CSS -->
         <link href="../css/app.min.1.css" rel="stylesheet">
         <link href="../css/app.min.2.css" rel="stylesheet"> 
+        <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"> -->
+        
+        <!-- Datatable Material -->
+        <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.1.0/material.min.css" rel="stylesheet">
+        <link href="https://cdn.datatables.net/1.10.19/css/dataTables.material.min.css" rel="stylesheet"> -->
+        <style>
+            @import url('../node_modules/font-awesome/css/font-awesome.min.css');
+            /* @import url('../node_modules/@chenfengyuan/datepicker/dist/datepicker.min.css'); */
+            /* @import url('../node_modules/bootstrap-datetimepicker-npm/build/css/bootstrap-datetimepicker.min.css'); */
+            td.details-control {
+                background: url('../img/details_open.png') no-repeat center center;
+                cursor: pointer;
+            }
+            tr.shown td.details-control {
+                background: url('../img/details_close.png') no-repeat center center;
+            }
+        </style>
+        
         
     </head>
     <body data-ma-header="teal">
@@ -242,7 +262,160 @@
                     <div class="c-header">
                         <h2>Corte de caja</h2>
                     </div>
-
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Historial</h2>
+                                </div>
+                                <div class="card-body card-padding">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="historial" class="display" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th colspan="4">Montos</th>
+                                                        <th colspan="2">Fechas</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Inicial</th>
+                                                        <th>Ventas</th>
+                                                        <th>Final</th>
+                                                        <th>Diferencia</th>
+                                                        <th>Inicio</th>
+                                                        <th>Fin</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Corte</h2>
+                                </div>
+                                <div class="card-body card-padding">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="montoInicial">Monto inicial</label>
+                                                <div class="fg-line">
+                                                    <input 
+                                                        type="number"
+                                                        class="form-control"
+                                                        id="montoInicial"
+                                                        disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="montoFinal">Monto final</label>
+                                                <div class="fg-line">
+                                                    <input type="number" class="form-control" id="montoFinal">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="montoVentas">Ventas</label>
+                                                <div class="fg-line">
+                                                    <input type="number" class="form-control" id="montoVentas" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <div class="form-group">
+                                                <label class="control-label" for="diferencia">Diferencia</label>
+                                                <div class="fg-line">
+                                                    <input type="number" class="form-control" id="diferencia" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <button id="btnGuardarCorte" class="btn palette-Blue bg btn-icon-text waves-effect" disabled>
+                                                <i class="zmdi zmdi-check"></i> Guardar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Ventas</h2>
+                                </div>
+                                
+                                <div class="card-body card-padding">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <div class='input-group date' id='dpFechaInicio'>
+                                                    <input type='text' class="form-control" onkeydown="return false" />
+                                                    <span class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <div class='input-group date' id='dpFechaFin'>
+                                                    <input type='text' class="form-control" onkeydown="return false"/>
+                                                    <span class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <button id="searchTicketsPaid" class="btn btn-success btn-icon waves-effect waves-circle waves-float">
+                                                <i class="zmdi zmdi-search"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="example" class="display" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>No. Ticket</th>
+                                                        <th>Fecha</th>
+                                                        <th>Estado</th>
+                                                        <th>total</th>
+                                                        <th>Pago</th>
+                                                        <th>Cambio</th>
+                                                        <th>Empleado</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- <textarea data-toggle="datepicker"></textarea>
+                                    <div data-toggle="datepicker"></div> -->
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 
+                   
                     
                 </div>
             </section>
@@ -270,8 +443,12 @@
             </div>
         </div>
         
-        <!-- Javascript Libraries -->
+
+        
+        <script src="../js/client_side/cut.js"></script>
         <script src="../libs/js/bootstrap.min.js"></script>
+        <!-- Javascript Libraries -->
+        
        
         <!--<script src="./vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>-->
         <script src="../libs/js/waves.min.js"></script>

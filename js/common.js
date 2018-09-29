@@ -14,7 +14,7 @@ var _tickets = [];
 var _ticket = {};
 var _recordsNoPay = [];
 var _idTicket = 0;
-var port = 8080; // 8080 51990
+var port = 51990; // 8080 51990
 
 
 /*--------------------------------------
@@ -93,8 +93,8 @@ function alertExecuteFunction(title, text, type, functionHandle) {
 $(document).ready(function () {
     
     if (sessionStorage.getItem('IPServer') !== null) {
-        apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':' + port + '/';
-        // apiURL = 'http://localhost:' + port + '/';
+        // apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':' + port + '/';
+        apiURL = 'http://localhost:' + port + '/';
     } else {
         ipcRenderer.send('goForIPServer', 1);
     }
@@ -107,8 +107,8 @@ $(document).ready(function () {
 ipcRenderer.on('getForIPServer', (event, arg) => {  
     var ips = JSON.parse(arg);
     sessionStorage.setItem('IPServer', ips.ipServer);
-    apiURL = 'http://' + ips.ipServer + ':' + port + '/';
-    // apiURL = 'http://localhost:' + port + '/';
+    // apiURL = 'http://' + ips.ipServer + ':' + port + '/';
+    apiURL = 'http://localhost:' + port + '/';
     sessionStorage.setItem('IPServer', ips.ipServer);
 });
 
