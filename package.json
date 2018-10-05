@@ -1,7 +1,7 @@
 {
   "name": "cyber-server",
   "main": "main.js",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "license": "MIT",
   "description": "Aplicacion de escritorio para control de un cyber cafe asi como un punto de venta.",
   "author": "Edel Custodio Frias",

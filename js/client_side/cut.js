@@ -8,7 +8,7 @@ require( 'datatables.net-bs4' )();
 require( 'datatables.net-responsive-dt' )()
 var dt = require( 'datatables.net' )( window, $ );
 let apiURL = '';
-var port = 51990; // 8080 51990
+var port = 8080; // 8080 51990
 var _tickets;
 var tableTickets;
 var tableHistorial;
@@ -18,8 +18,8 @@ let dpFechaInicio;
 let dpFechaFin;
 
 $(document).ready(function() {
-    // apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':' + port + '/';
-    apiURL = 'http://localhost:' + port + '/';
+    apiURL = 'http://' + sessionStorage.getItem('IPServer') + ':' + port + '/';
+    // apiURL = 'http://localhost:' + port + '/';
 
     
     fechaInicio = new Date();
